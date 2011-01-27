@@ -11,6 +11,7 @@
 
 .slide-view-module .slide-before, .slide-view-module .slide-after {
 	position: absolute;
+	z-index: -1;
 }
 .slide-current {
 	opacity: 1;
