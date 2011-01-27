@@ -1,0 +1,75 @@
+@import "../reset.css";
+
+/* Base font size */
+html, body {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+/*	width: 100%;*/
+}
+body {
+	font-size: 100%;
+	color: #222;
+}
+h1, h2, h3, h4, h5 {
+	font-weight: bold;
+	margin: .25em 0;
+}
+
+h1 {
+	font-size: 3em;
+}
+
+h2 {
+	font-size: 1.5em;
+	color: #666;
+}
+
+p {
+	line-height: 1.25em;
+}
+
+.slide-container {
+	position: relative;
+	overflow: hidden;
+	height: 100%;
+}
+
+.slide {
+	font-size: 200%;
+	top: 0;
+	left: 10%;
+	width: 80%;
+	margin: 0 auto;
+	opacity: .25;
+}
+
+.slide-current {
+	opacity: 1;
+}
+
+.slide ul {
+	list-style-type: disc;
+}
+
+.slide li {
+	margin-bottom: .25em;
+}
+
+.no-touch .slide-touch {
+	display: none;
+}
+
+.touch .slide-no-touch {
+	display: none;
+}
+
+@media screen and (max-device-width: 480px) {
+	body {
+		height: auto;
+	}
+	.slide {
+		font-size: 100%;
+	}
+}
+

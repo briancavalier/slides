@@ -1,0 +1,23 @@
+.slide {
+	transition:         all 400ms ease;
+	-webkit-transition: all 400ms ease;
+	-moz-transition:    all 400ms ease;
+	-o-transition:      all 400ms ease;
+	-khtml-transition:  all 400ms ease;
+	-ms-transition:     all 400ms ease;
+	
+	opacity: .1;
+}
+
+.slide-view-module .slide-before {
+	position: absolute;
+	left: -100%;
+}
+.slide-view-module .slide-after {
+	position: absolute;
+	left: 100%;
+}
+
+.slide-current {
+	opacity: 1;
+}

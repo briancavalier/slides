@@ -1,0 +1,65 @@
+@import "../basic.css";
+
+.slide {
+	font-size: 250%;
+}
+
+.slide h1 {
+	font-size: 4em;
+	font-weight: bold;
+	color: #dadada;
+	margin-bottom: 0;
+}
+
+.slide h2 {
+	color: #444;
+	margin-top: 0;
+	margin-left: .5em;
+}
+
+.slide p {
+	color: #222;
+	margin-left: 2em;
+}
+
+.slide em {
+	font-style: normal;
+	color: #888;
+}
+
+.slide ul > ul {
+	font-size: 90%;
+}
+
+.slide li {
+	line-height: 1em;
+	margin-bottom: .75em;
+}
+
+.slide footer {
+	font-size: .5em;
+	margin-top: 2em;
+	text-align: right;
+}
+
+.slide footer p {
+	color: #ccc;
+}
+
+.slide .slide-layout-title {
+	margin-top: 15%;
+}
+
+@media screen and (max-device-width: 480px) {
+	.slide {
+		font-size: 90%;
+	}
+	
+	.slide p {
+		font-size: 1.25em;
+	}
+	
+	.slide footer {
+		font-size: .75em;
+	}
+}

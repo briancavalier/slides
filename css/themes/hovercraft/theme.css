@@ -1,0 +1,48 @@
+@import "../basic.css";
+
+@font-face {
+	font-family: 'B733-DecoRegular';
+	src: url('fonts/b733-deco-regular-webfont.eot');
+	src: local('☺'), url('fonts/b733-deco-regular-webfont.woff') format('woff'), url('fonts/b733-deco-regular-webfont.ttf') format('truetype'), url('fonts/b733-deco-regular-webfont.svg#webfontH9pO81ke') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+.slide-theme-hovercraft .page-main {
+	color: #fff;
+	font-family: "Helvetica Neueu", "Helvetica", "Arial", sans-serif;
+	background-repeat: no-repeat;
+	background-color: #053359;
+	background-image: -webkit-gradient(radial, 50% 50%, 0, 50% 50%, 1000, from(#053359), to(#032442));
+	background-image: -moz-radial-gradient(center 45deg, circle closest-side, #053359 0, #032442 1000px);
+}
+
+.slide-theme-hovercraft .slide {
+	width: 80%;
+	margin: 0 auto;
+}
+.slide-theme-hovercraft .slide h1 {
+	margin-top: 1em;
+}
+.slide-theme-hovercraft .slide h2 {
+	color: rgb(243, 124, 55);
+}
+
+.slide-theme-hovercraft .slide-layout-logo h1 {
+	background-image: url("im/hovercraft-logotype-800.png");
+	background-repeat: no-repeat;
+	width: 100%;
+	margin-top: 1.25em;
+	height: 62px;
+	text-indent: -9999px;
+}
+.slide-theme-hovercraft .slide-layout-logo h2 {
+	color: rgb(243, 124, 55);
+	font-family: 'B733-DecoRegular';
+}
+
+@media screen and (max-device-width: 480px) {
+	.slide-theme-hovercraft .slide-layout-logo h1 {
+		background-size: 30%;
+	}
+}
