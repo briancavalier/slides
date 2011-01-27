@@ -57,6 +57,15 @@
 	
 	.slide p {
 		font-size: 1.25em;
+		margin-left: 0;
+	}
+	
+	.slide h2 {
+		margin-left: 0;
+	}
+	
+	.slide li {
+		font-size: 1.25em;
 	}
 	
 	.slide footer {

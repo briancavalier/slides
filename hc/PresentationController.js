@@ -20,21 +20,16 @@ define([], function() {
 	
 	function initTouchEvents(slideView) {
 		body.ontouchstart = function(e) {
-			if(e.touches[0].target && e.touches[0].target.type === 'a') {
-				return true;
-			}
-			
-			var x = e.changedTouches[0].pageX,
-				y = e.changedTouches[0].pageY,
+			var x = e.targetTouches[0].pageX,
+				y = e.targetTouches[0].pageY,
 				moved = false;
 
 			body.ontouchmove = function(e) {
 				moved = true;
-				stopEvent(e);
-				return false;
 			};
 			
 			body.ontouchend = function(e) {
+				var ret = true;
 				try {
 					if(e.changedTouches.length === 1) {
 						var next;
@@ -48,6 +43,8 @@ define([], function() {
 								next = dx <= 0;
 							}
 							
+							ret = false;
+							
 						} else {
 							stopEvent(e);
 							next = e.changedTouches[0].pageX > (window.innerWidth/2);
@@ -60,16 +57,17 @@ define([], function() {
 						}
 
 					}
+
+					return ret;
 					
 				} finally {
 					moved = false;
 					body.ontouchend = null;
 					body.ontouchmove = null;
 				}
-
 			};
 			
-			return false;
+			return true;
 		};
 		
 	}
