@@ -1,11 +1,8 @@
 @import "../reset.css";
 
 /* Base font size */
-html, body {
+html {
 	height: 100%;
-	margin: 0;
-	padding: 0;
-/*	width: 100%;*/
 }
 body {
 	font-size: 100%;
@@ -69,7 +66,8 @@ p {
 		height: auto;
 	}
 	.slide {
+		height: auto;
+		word-wrap: break-word;
 		font-size: 100%;
 	}
 }
-
