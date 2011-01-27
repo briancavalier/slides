@@ -9,30 +9,6 @@ body {
 	color: #222;
 }
 
-h1, h2, h3, h4, h5 {
-	font-weight: bold;
-	margin: .25em 0;
-}
-
-h1 {
-	font-size: 3em;
-	margin-top: 0;
-}
-
-h2 {
-	font-size: 1.5em;
-	color: #666;
-}
-
-p {
-	line-height: 1.25em;
-}
-
-em {
-	font-style: normal;
-	color: #888;
-}
-
 footer {
 	min-width: 40em;
 	width: 80%;
@@ -43,6 +19,30 @@ footer {
 
 footer p {
 	color: #ccc;
+}
+
+em {
+	font-style: normal;
+	color: #888;
+}
+
+.slide h1, .slide h2, .slide h3, .slide h4, .slide h5 {
+	font-weight: bold;
+	margin: .25em 0;
+}
+
+.slide h1 {
+	font-size: 3em;
+	margin-top: 0;
+}
+
+.slide h2 {
+	font-size: 1.5em;
+	color: #666;
+}
+
+.slide p {
+	line-height: 1.25em;
 }
 
 .slide-container {
@@ -96,7 +96,19 @@ footer p {
 	}
 	.slide {
 		height: auto;
-		word-wrap: break-word;
 		font-size: 100%;
+		min-height: auto;
+	}
+	
+	.slide-view-module {
+		min-width: 0;
+		min-height: 0;
+	}
+	
+	footer {
+/*		margin: .5em auto;*/
+/*		width: 80%;*/
+		min-width: 0;
+		font-size: .75em;
 	}
 }

@@ -49,13 +49,21 @@
 		font-size: 90%;
 	}
 	
+	.slide-container {
+		margin-top: 1em;
+	}
+
+	.slide .slide-layout-title {
+		padding-top: 0;
+	}
+	
 	.slide p {
 		font-size: 1.25em;
-		margin-left: 0;
+		margin-left: .25em;
 	}
 	
 	.slide h2 {
-		margin-left: 0;
+		margin-left: .25em;
 	}
 	
 	.slide li {
