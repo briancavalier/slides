@@ -13,6 +13,8 @@
 	font-weight: bold;
 	color: #dadada;
 	margin-bottom: 0;
+	letter-spacing: -.08em;
+	text-rendering: optimizeLegibility;
 }
 
 .slide h2 {
@@ -65,7 +67,7 @@
 	.slide h2 {
 		margin-left: .25em;
 	}
-	
+
 	.slide li {
 		font-size: 1.25em;
 	}
