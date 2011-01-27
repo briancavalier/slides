@@ -77,25 +77,34 @@ define([], function() {
 	}
 
 	return function SlideController(slideView) {
+		body.className += " presentation-loading";
 		
 		window.onkeyup = function(e) {
-			var key = (window.event) ? event.keyCode : e.keyCode;
+			var key = (window.event) ? event.keyCode : e.keyCode,
+				ret = true;
 			switch(key) {
-				case 8:
-				case 37:
-				case 38:
+				case 37: // Left arrow
+				// case 38: // Up arrow, used for keyboard scrolling
 					slideView.prev().then(success);
+					stopEvent(e);
+					ret = false;
 					break;
-				case 32:
-				case 39:
-				case 40:
+				case 32: // Space
+				case 39: // Right arrow
+				// case 40: // Down arrow, used for keyboard scrolling
 					slideView.next().then(success);
+					stopEvent(e);
+					ret = false;
 					break;
 			}
+			
+			return ret;
 		};
 		
 		// Goto first slide
-		slideView.go(getHash());
+		slideView.go(getHash()).then(function() {
+			body.className = body.className.replace(/presentation-loading/g, "");
+		});
 		
 		if('onhashchange' in window) {
 			window.onhashchange = function(e) {

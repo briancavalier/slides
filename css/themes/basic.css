@@ -1,13 +1,14 @@
 @import "../reset.css";
 
-/* Base font size */
 html {
 	height: 100%;
 }
+
 body {
 	font-size: 100%;
 	color: #222;
 }
+
 h1, h2, h3, h4, h5 {
 	font-weight: bold;
 	margin: .25em 0;
@@ -15,6 +16,7 @@ h1, h2, h3, h4, h5 {
 
 h1 {
 	font-size: 3em;
+	margin-top: 0;
 }
 
 h2 {
@@ -26,10 +28,35 @@ p {
 	line-height: 1.25em;
 }
 
+em {
+	font-style: normal;
+	color: #888;
+}
+
+footer {
+	min-width: 40em;
+	width: 80%;
+	margin: 1em auto;
+	font-size: 1em;
+	text-align: right;
+}
+
+footer p {
+	color: #ccc;
+}
+
 .slide-container {
 	position: relative;
 	overflow: hidden;
 	height: 100%;
+}
+
+.slide-view-module {
+	position: relative;
+	height: 100%;
+	overflow: hidden;
+	min-width: 40em;
+	min-height: 20em;
 }
 
 .slide {
@@ -37,12 +64,14 @@ p {
 	top: 0;
 	left: 10%;
 	width: 80%;
+	min-height: 5em;
 	margin: 0 auto;
 	opacity: .25;
 }
 
 .slide-current {
 	opacity: 1;
+	z-index: 1;
 }
 
 .slide ul {

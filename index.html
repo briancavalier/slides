@@ -27,6 +27,12 @@
 	<!-- <link rel="shortcut icon" href="/favicon.ico">
 	<link rel="apple-touch-icon" href="/apple-touch-icon.png"> -->
 	
+	<style type="text/css">
+		.presentation-loading * {
+			visibility: hidden;
+		}
+	</style>
+	
 	<script src="modernizr-1.6.min.js" type="text/javascript" charset="utf-8"></script>
 
 	<script type="text/javascript" src="require.js"></script>
@@ -38,7 +44,7 @@
 				'hc/PresentationController',
 				// 'cssx/css!css/themes/hovercraft/theme.css',
 				'cssx/css!css/themes/gray/theme.css',
-				'cssx/css!css/themes/fly.css'
+				'cssx/css!css/themes/fade.css'
 			],
 			function(Model, View, Controller) {
 				var slides = View(document.getElementsByClassName('slide-container')[0], Model('slides', true));
@@ -47,7 +53,7 @@
 	</script>
 </head>
 
-<body class="slide-theme-hovercraft">
+<body class="slide-theme-hovercraft presentation-loading">
 
 	<div>
 		<header>
@@ -59,7 +65,9 @@
 		</div>
 
 		<footer>
-
+			<p class="slide-no-touch">Use <em>left/right arrows, or space</em> to move between slides</p>
+			<p class="slide-touch"><em>Touch near the right and left edges</em> of your screen to move between slides</p>
+			<p>Copyright &copy; 2011 Brian Cavalier</p>
 		</footer>
 	</div>
 	

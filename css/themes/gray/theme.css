@@ -1,5 +1,9 @@
 @import "../basic.css";
 
+.slide-container {
+	margin-top: 4em;
+}
+
 .slide {
 	font-size: 250%;
 }
@@ -36,18 +40,8 @@
 	margin-bottom: .75em;
 }
 
-.slide footer {
-	font-size: .5em;
-	margin-top: 2em;
-	text-align: right;
-}
-
-.slide footer p {
-	color: #ccc;
-}
-
 .slide .slide-layout-title {
-	margin-top: 15%;
+	padding-top: 2em;
 }
 
 @media screen and (max-device-width: 480px) {
@@ -67,8 +61,5 @@
 	.slide li {
 		font-size: 1.25em;
 	}
-	
-	.slide footer {
-		font-size: .75em;
-	}
+
 }
