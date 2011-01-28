@@ -43,7 +43,7 @@ define(['require'], function(require) {
 		};
 	}
 
-	return function SlideModel(slidePath, preload) {
+	return function PresentationModel(slidePath, preload) {
 		
 		var cachedSlides = [];
 		

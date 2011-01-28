@@ -76,7 +76,7 @@ define([], function() {
 		setHash(result.slide);
 	}
 
-	return function SlideController(slideView) {
+	return function PresentationController(slideView) {
 		body.className += " presentation-loading";
 		
 		window.onkeyup = function(e) {

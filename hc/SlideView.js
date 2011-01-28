@@ -7,7 +7,7 @@ define(['cssx/css!./SlideView.css'], function() {
 		slideContainerTransitioningState = slideContainerIdentity + ' slide-transitioning',
 		undef;
 	
-	return function createSlideView(slideContainer, slideModel) {
+	return function SlideView(slideContainer, slideModel) {
 		
 		var current = -1,
 			slides = [],
