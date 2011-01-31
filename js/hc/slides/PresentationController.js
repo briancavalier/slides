@@ -1,6 +1,8 @@
 define([], function() {
 	
-	var body = document.body,
+	var doc = window.document,
+		html = doc.getElementsByTagName('html')[0],
+		body = window.document.body,
 		supportsTouch = 'ontouchstart' in body,
 		undef;
 		
@@ -17,6 +19,21 @@ define([], function() {
 		e.preventDefault();
 		e.stopPropagation();
 	}
+	
+	function addClass(node, clss) {
+		var cn = node.className,
+			r = new RegExp("\\s+" + clss + "|" + clss + "\\s+");
+		
+		if(cn) {
+			if(cn !== clss && !r.test(cn)) {
+				node.className += " " + clss;
+			}
+		} else {
+			node.className = clss;
+		}
+	}
+	
+	addClass(html, supportsTouch ? "touch" : "no-touch");
 	
 	function initTouchEvents(slideView) {
 		body.ontouchstart = function(e) {
@@ -103,7 +120,7 @@ define([], function() {
 		
 		// Goto first slide
 		slideView.go(getHash()).then(function() {
-			body.className = body.className.replace(/presentation-loading/g, "");
+			body.className = body.className.replace(/\s*presentation-loading\s*/g, " ");
 		});
 		
 		if('onhashchange' in window) {
@@ -116,4 +133,5 @@ define([], function() {
 			initTouchEvents(slideView);
 		}
 	};
+	
 });

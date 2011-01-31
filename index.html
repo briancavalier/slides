@@ -1,11 +1,18 @@
-<!doctype html>  
+<!DOCTYPE html>  
+
+<!-- 
+	This is a basic HTML template for creating slide presentations using
+	the slide framework.  
+ -->
+
+<!-- Parts from HTML5 Boilerplate: http://html5boilerplate.com -->
 
 <!-- paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/ --> 
-<!--[if lt IE 7 ]> <html lang="en" class="no-js ie6"> <![endif]-->
-<!--[if IE 7 ]>    <html lang="en" class="no-js ie7"> <![endif]-->
-<!--[if IE 8 ]>    <html lang="en" class="no-js ie8"> <![endif]-->
-<!--[if IE 9 ]>    <html lang="en" class="no-js ie9"> <![endif]-->
-<!--[if (gt IE 9)|!(IE)]><!--> <html lang="en" class="no-js"> <!--<![endif]-->
+<!--[if lt IE 7 ]> <html lang="en" class="ie6"> <![endif]-->
+<!--[if IE 7 ]>    <html lang="en" class="ie7"> <![endif]-->
+<!--[if IE 8 ]>    <html lang="en" class="ie8"> <![endif]-->
+<!--[if IE 9 ]>    <html lang="en" class="ie9"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--> <html lang="en"> <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
 
@@ -14,56 +21,73 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
 	<title>HTML Slide Presentation Framework</title>
-	<meta name="description" content="">
+	<meta name="description" content="HTML Slide Presentation framework">
 	<meta name="author" content="Brian Cavalier">
 
 	<!--  Mobile viewport optimized: j.mp/bplateviewport -->
 	<meta name="viewport" content="width=device-width; initial-scale=1.0; user-scalable=0">
-	<!-- <meta name="apple-mobile-web-app-capable" content="yes" />
-	<meta name="apple-touch-fullscreen" content="yes" />
-	<meta name="apple-mobile-web-app-status-bar-style" content="black" /> -->
 	
-	<!-- Place favicon.ico & apple-touch-icon.png in the root of your domain and delete these references -->
-	<!-- <link rel="shortcut icon" href="/favicon.ico">
-	<link rel="apple-touch-icon" href="/apple-touch-icon.png"> -->
-	
+	<!-- Ensure no FUOC in the slides -->
 	<style type="text/css">
 		.presentation-loading * {
 			visibility: hidden;
 		}
 	</style>
 	
-	<script src="modernizr-1.6.min.js" type="text/javascript" charset="utf-8"></script>
+	<!-- <script src="js/modernizr-1.6.min.js" type="text/javascript" charset="utf-8"></script> -->
 
-	<script type="text/javascript" src="require.js"></script>
+	<!-- Configure RequireJS to load slides from the slides dir, and css from
+	     the css dir.  Note that these are relative to the location of require.js -->
 	<script type="text/javascript">
+		(function(global) {
+			global.require = {
+				paths: {
+					"slides": "../slides",
+					"css": "../css"
+				}
+			};
+		})(window);
+	</script>
+	<script type="text/javascript" src="js/require.js"></script>
+	<script type="text/javascript">
+		// Load the Model, View, Controller, theme, and transition css, then
+		// bootstrap the presentation.
 		require(
 			[
-				'hc/PresentationModel',
-				'hc/SlideView',
-				'hc/PresentationController',
-				// 'cssx/css!css/themes/hovercraft/theme.css',
-				'cssx/css!css/themes/gray/theme.css',
-				'cssx/css!css/themes/fade.css'
+				'hc/slides/PresentationModel',        // Model, i.e. slide content
+				'hc/slides/SlideView',                // View
+				'hc/slides/PresentationController',   // Controller
+				'cssx/css!css/themes/gray/theme.css', // Slide theme
+				'cssx/css!css/themes/fade.css'        // Slide transition
 			],
 			function(Model, View, Controller) {
+				// The relative path to the slides
+				var slidePath = 'slides';
+				
+				// Create the view and hand it a model, then create a controller to
+				// control the view.
 				var slides = View(document.getElementsByClassName('slide-container')[0], Model('slides', true));
-				var c = Controller(slides);
+				
+				Controller(slides);
 			});
 	</script>
 </head>
 
-<body class="slide-theme-hovercraft presentation-loading">
+<!-- Avoid any FUOC by adding presentation-loading, which the framework
+     will remove later once the first slide is ready -->
+<body class="presentation-loading">
 
 	<div>
 		<header>
 
 		</header>
 
+		<!-- The container to hold the slides -->
 		<div class="slide-container">
 
 		</div>
 
+		<!-- Extra notes -->
 		<footer>
 			<p class="slide-no-touch">Use <em>left/right arrows, or space</em> to move between slides</p>
 			<p class="slide-touch"><em>Touch near the right and left edges</em> of your screen to move between slides</p>
