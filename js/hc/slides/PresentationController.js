@@ -1,8 +1,11 @@
-/**
- * @license Copyright (c) 2010 Brian Cavalier
- * LICENSE: see the LICENSE.txt file. If file is missing, this file is subject
- * to the MIT License at: http://www.opensource.org/licenses/mit-license.php.
+/*
+ 	@license Copyright (c) 2011 Brian Cavalier
+	LICENSE: see the LICENSE.txt file. If file is missing, this file is subject
+	to the MIT License at: http://www.opensource.org/licenses/mit-license.php.
  */
+/*
+	Class: PresentationController
+*/
 define([], function() {
 	
 	var doc = window.document,
@@ -98,6 +101,16 @@ define([], function() {
 		setHash(result.slide);
 	}
 
+	/*
+		Function: PresentationController
+		Creates a new PresentationController that will control a <SlideView>
+		
+		Parameters:
+			slideView - the <SlideView> to control
+			
+		Returns:
+		a new PresentationController
+	*/
 	return function PresentationController(slideView) {
 		body.className += " presentation-loading";
 		

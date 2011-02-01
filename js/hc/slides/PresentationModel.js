@@ -1,10 +1,22 @@
-/**
- * @license Copyright (c) 2010 Brian Cavalier
- * LICENSE: see the LICENSE.txt file. If file is missing, this file is subject
- * to the MIT License at: http://www.opensource.org/licenses/mit-license.php.
+/*
+ 	@license Copyright (c) 2011 Brian Cavalier
+	LICENSE: see the LICENSE.txt file. If file is missing, this file is subject
+	to the MIT License at: http://www.opensource.org/licenses/mit-license.php.
  */
+/*
+	Class: PresentationModel
+*/
 define(['require'], function(require) {
 	
+	var defaultPreload = 5,
+		preloadThreshold = 2;
+
+	/*
+		Function: promise
+		
+		Returns:
+		a new promise
+	*/
 	function promise() {
 		var value,
 			complete = 0,
@@ -48,23 +60,37 @@ define(['require'], function(require) {
 		};
 	}
 
+	/*
+		Function: PresentationModel
+		Creates a new PresentationModel for accessing slides from separate HTML files
+		named 0.html, 1.html, 2.html, etc.
+		
+		Parameters:
+			slidePath - relative path to directory containing slide files
+			preload - (optional) number of slides to preload initially, and as slides are viewed
+		
+		Returns:
+		a new multi-file slide PresnetationModel
+	*/
 	return function PresentationModel(slidePath, preload) {
 		
-		var cachedSlides = [];
-		
+		var cachedSlides = [],
+			preloadCount = preload || defaultPreload;
+
 		function preloadSlides(start, n) {
-			var count = start || 0;
+			var i = start,
+				end = start + n;
 						
 			function preloadNext() {
-				if(preload < n) {
-					getSlide(preload++).then(preloadNext);
+				if(i < end) {
+					getSlide(i++).then(preloadNext);
 				}
 			}
 
 			preloadNext();
 		}
 		
-		function getSlide(slide) {
+		function getSlide(slide, preloadCount) {
 			var p = promise(),
 				slideModule = 'text!' + slidePath + '/' + slide + '.html';
 
@@ -82,7 +108,9 @@ define(['require'], function(require) {
 					});
 				}
 				
-				preloadSlides(slide, preload);
+				if(preloadCount && (cachedSlides.length - slide) <= preloadThreshold) {
+					preloadSlides(slide + 1, preloadCount);
+				}
 				
 			} else {
 				p.reject(slide);
@@ -90,13 +118,11 @@ define(['require'], function(require) {
 			
 			return p.safe;
 		}
-		
-		if(preload !== false) {
-			preloadSlides(0, preload || 3);
-		}
 
 		return {
-			get: getSlide
+			get: function(slide) {
+				return getSlide(slide, preloadCount);
+			}
 		};
 		
 	};

@@ -1,8 +1,11 @@
-/**
- * @license Copyright (c) 2010 Brian Cavalier
- * LICENSE: see the LICENSE.txt file. If file is missing, this file is subject
- * to the MIT License at: http://www.opensource.org/licenses/mit-license.php.
+/*
+ 	@license Copyright (c) 2011 Brian Cavalier
+	LICENSE: see the LICENSE.txt file. If file is missing, this file is subject
+	to the MIT License at: http://www.opensource.org/licenses/mit-license.php.
  */
+/*
+	Class: SlideView
+*/
 define([], function() {
 	
 	var slideBeforeState = 'slide slide-before',
@@ -12,24 +15,66 @@ define([], function() {
 		slideContainerTransitioningState = slideContainerIdentity + ' slide-transitioning',
 		undef;
 	
+	/*
+		Constructor: SlideView
+		Creates a new SlideView
+		
+		Parameters:
+			slideContainer - DomNode into which slides will be added
+			slideModel - model that supplies slides via a get(slideNumber) function, such as <PresentationModel>
+			
+		Returns:
+		a new SlideView
+	*/
 	return function SlideView(slideContainer, slideModel) {
 		
 		var current = -1,
 			slides = [],
 			container;
 		
+		/*
+			Function: next
+			Goes to the next slide, if one exists.
+			
+			Returns:
+			a promise that will be resolved when the new slide has been displayed
+		*/
 		function next() {
 			return go(current+1);
 		}
 		
+		/*
+			Function: prev
+			Goes to the previous slide, if one exists.
+			
+			Returns:
+			a promise that will be resolved when the new slide has been displayed
+		*/
 		function prev() {
 			return go(current-1);
 		}
 		
+		/*
+			Function: reset
+			Goes to the first slide
+			
+			Returns:
+			a promise that will be resolved when the new slide has been displayed
+		*/
 		function reset() {
 			return go(0);
 		}
 		
+		/*
+			Function: go
+			Goes to the supplied slide number (zero-based index)
+			
+			Parameters:
+				slide - number of the slide to go to
+
+			Returns:
+			a promise that will be resolved when the new slide has been displayed
+		*/
 		function go(slide) {
 			var p = slideModel.get(slide);
 			if(slide == current) {
