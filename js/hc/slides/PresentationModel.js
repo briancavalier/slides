@@ -1,3 +1,8 @@
+/**
+ * @license Copyright (c) 2010 Brian Cavalier
+ * LICENSE: see the LICENSE.txt file. If file is missing, this file is subject
+ * to the MIT License at: http://www.opensource.org/licenses/mit-license.php.
+ */
 define(['require'], function(require) {
 	
 	function promise() {
@@ -49,9 +54,9 @@ define(['require'], function(require) {
 		
 		function preloadSlides(start, n) {
 			var count = start || 0;
-			
+						
 			function preloadNext() {
-				if(n === true || preload < n) {
+				if(preload < n) {
 					getSlide(preload++).then(preloadNext);
 				}
 			}
@@ -86,8 +91,8 @@ define(['require'], function(require) {
 			return p.safe;
 		}
 		
-		if(preload) {
-			preloadSlides(0, preload);
+		if(preload !== false) {
+			preloadSlides(0, preload || 3);
 		}
 
 		return {
