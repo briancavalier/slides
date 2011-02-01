@@ -1,0 +1,16 @@
+# Slide Presentation Framework
+
+I got fed up with using Powerpoint and Keynote to make and give presentations, so I wrote this framework.  It uses slides in plain HTML, combined with themes, layouts, and slide transitions in CSS, and a small Javascript MVC framework for showing them.
+
+## How do I use it?
+
+### Quick start
+
+1. Download it
+1. Put numbered HTML slide files in the slides directory
+	- There are example slides there now.  You may want to look at them for format ideas, and then move them aside.
+1. Open index.html in your browser
+
+### Not-so-quick start
+
+Coming soon

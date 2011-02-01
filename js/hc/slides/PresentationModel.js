@@ -3,16 +3,21 @@
 	LICENSE: see the LICENSE.txt file. If file is missing, this file is subject
 	to the MIT License at: http://www.opensource.org/licenses/mit-license.php.
  */
+
 /*
 	Class: PresentationModel
 */
 define(['require'], function(require) {
-	
-	var defaultPreload = 5,
+
+	var 
+		// Default number of slides to preload
+		defaultPreload = 5,
+		// Slides will only be preloaded when there are this
+		// many already-loaded slides beyond the current slide
 		preloadThreshold = 2;
 
 	/*
-		Function: promise
+		Constructor: promise
 		
 		Returns:
 		a new promise
@@ -61,7 +66,7 @@ define(['require'], function(require) {
 	}
 
 	/*
-		Function: PresentationModel
+		Constructor: PresentationModel
 		Creates a new PresentationModel for accessing slides from separate HTML files
 		named 0.html, 1.html, 2.html, etc.
 		
@@ -77,19 +82,37 @@ define(['require'], function(require) {
 		var cachedSlides = [],
 			preloadCount = preload || defaultPreload;
 
+		/*
+			Function: preloadSlides
+			Preloads n slides starting at the supplied slide number
+			
+			Parameters:
+				start - first slide to preload, but not show
+				n - number of slides to preload
+		*/
 		function preloadSlides(start, n) {
-			var i = start,
-				end = start + n;
-						
-			function preloadNext() {
-				if(i < end) {
-					getSlide(i++).then(preloadNext);
-				}
+			var end = start + n;
+				
+			for (var i = start; i < end; i++) {
+				getSlide(i);
 			}
-
-			preloadNext();
 		}
 		
+		/*
+			Function: getSlide
+			Ensures that the supplied slide number is loaded, and returns a promise that
+			will be resolved when the slide is ready.
+			
+			Parameters:
+				slide - number of the slide to get
+				preloadCount - number of slides beyond slide to ensure are also loaded
+				
+			Returns:
+			a promise that will be resolved when the supplied slide number is loaded and ready.
+			The promise value will have 2 fields:
+				* slide - the slide number
+				* content - the slide content
+		*/
 		function getSlide(slide, preloadCount) {
 			var p = promise(),
 				slideModule = 'text!' + slidePath + '/' + slide + '.html';
@@ -120,6 +143,20 @@ define(['require'], function(require) {
 		}
 
 		return {
+			/*
+				Function: get
+				Ensures that the supplied slide number is loaded, and returns a promise that
+				will be resolved when the slide is ready.
+
+				Parameters:
+					slide - number of the slide to get
+	
+				Returns:
+				a promise that will be resolved when the supplied slide number is loaded and ready.
+				The promise value will have 2 fields:
+					* slide - the slide number
+					* content - the slide content
+			*/
 			get: function(slide) {
 				return getSlide(slide, preloadCount);
 			}

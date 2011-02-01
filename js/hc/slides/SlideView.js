@@ -8,6 +8,7 @@
 */
 define([], function() {
 	
+	// OOCSS States for slides and slide container
 	var slideBeforeState = 'slide slide-before',
 		slideAfterState = 'slide slide-after',
 		slideCurrentState = 'slide slide-current',
@@ -150,11 +151,13 @@ define([], function() {
 				
 			}
 			
+			// TODO: Need to listen for transitionend here for browsers that support it.
+			container.className = slideContainerIdentity;
 		}
 
 		// Create a controlled container to hold slides
 		container = document.createElement('div');
-		container.className = 'slide-view-module';
+		container.className = slideContainerIdentity;
 		slideContainer.innerHTML = '';
 		slideContainer.appendChild(container);
 		

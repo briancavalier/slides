@@ -11,23 +11,54 @@ define([], function() {
 	var doc = window.document,
 		html = doc.getElementsByTagName('html')[0],
 		body = window.document.body,
+		// Detect touch support
 		supportsTouch = 'ontouchstart' in body,
 		undef;
+	
+	/*
+		Function: setHash
+		Sets the location hash to the supplied slide number.  This will
+		clobber any existing hash.
 		
+		Parameters:
+			slide - The slide number to which to set the hash
+	*/
 	function setHash(slide) {
 		window.location.hash = '#' + slide;
 	}
 	
+	/*
+		Function: getHash
+		
+		Returns:
+		the current location hash without the leading '#'
+	*/
 	function getHash() {
 		var h = window.location.hash;
 		return h.length > 1 && h[0] === '#' ? (1*h.substring(1)) : 0;
 	}
 	
+	/*
+		Function: stopEvent
+		Prevents the default action and stops propagation of the supplied DOM event.
+		
+		Parameters:
+			e - the event to stop
+	*/
 	function stopEvent(e) {
 		e.preventDefault();
 		e.stopPropagation();
 	}
 	
+	/*
+		Function: addClass
+		Adds the supplied class to the supplied DOM node--will not add a duplicate
+		class name if the supplied class is already present.
+		
+		Parameters:
+			node - DOM node to which to add clss
+			clss - class name to add
+	*/
 	function addClass(node, clss) {
 		var cn = node.className,
 			r = new RegExp("\\s+" + clss + "|" + clss + "\\s+");
@@ -41,9 +72,18 @@ define([], function() {
 		}
 	}
 	
+	// Add touch support hint
 	addClass(html, supportsTouch ? "touch" : "no-touch");
 	
+	/*
+		Function: initTouchEvents
+		Sets up touch events for navigating slides
+		
+		Parameters:
+			slideView - the <SlideView> on which to handle touch events
+	*/
 	function initTouchEvents(slideView) {
+		// TODO: Should use the slide view's container, not body.
 		body.ontouchstart = function(e) {
 			var x = e.targetTouches[0].pageX,
 				y = e.targetTouches[0].pageY,
@@ -97,6 +137,14 @@ define([], function() {
 		
 	}
 	
+	/*
+		Function: success
+		Callback to be invoked on successful <SlideView> transtions, currently just
+		updates the location hash by calling <setHash>
+		
+		Parameters:
+			result - result provided by <SlideView>
+	*/
 	function success(result) {
 		setHash(result.slide);
 	}
