@@ -7,6 +7,7 @@ I got fed up with using Powerpoint and Keynote to make and give presentations, s
 ### Quick start
 
 1. Download it
+	- You may want to open index.html in your browser to read a bit more about the framework.
 1. Put numbered HTML slide files in the slides directory
 	- There are example slides there now.  You may want to look at them for format ideas, and then move them aside.
 1. Open index.html in your browser
