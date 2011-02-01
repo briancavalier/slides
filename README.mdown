@@ -2,6 +2,8 @@
 
 I got fed up with using Powerpoint and Keynote to make and give presentations, so I wrote this framework.  It uses slides in plain HTML, combined with themes, layouts, and slide transitions in CSS, and a small Javascript MVC framework for showing them.
 
+You can read more about it in [this presentation, made with the framework.](http://briancavalier.com/code/slides/ "HTML Slide Presentation Framework")
+
 ## How do I use it?
 
 ### Quick start
