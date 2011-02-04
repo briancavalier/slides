@@ -28,8 +28,11 @@
 	<meta name="description" content="HTML Slide Presentation framework">
 	<meta name="author" content="Brian Cavalier">
 
-	<!--  Mobile viewport optimized: j.mp/bplateviewport -->
-	<meta name="viewport" content="width=device-width; initial-scale=1.0; user-scalable=0">
+	<!--  Mobile viewport optimized: adapted from Modernizr and
+	      http://stackoverflow.com/questions/2581957/iphone-safari-does-not-auto-scale-back-down-on-portrait-landscape-portrait
+	 -->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, maximum-scale=1.0">
+	<meta name="apple-mobile-web-app-capable" content="yes"/>
 	
 	<!-- Ensure no FUOC in the slides -->
 	<style type="text/css">
@@ -45,6 +48,7 @@
 	<script type="text/javascript">
 		(function(global) {
 			global.require = {
+				baseUrl: "js",
 				paths: {
 					"slides": "../slides",
 					"css": "../css"

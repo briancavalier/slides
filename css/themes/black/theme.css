@@ -6,31 +6,33 @@
 
 @import "../basic.css";
 
-.slide-view-module {
+.slide-container {
 	margin-top: 4em;
 }
 
 .slide {
 	font-size: 250%;
+	background: #000;
+	color: #eee;
 }
 
 .slide h1 {
 	font-size: 4em;
 	font-weight: bold;
-	color: #dadada;
+	color: #333;
 	margin-bottom: 0;
 	letter-spacing: -.08em;
 	text-rendering: optimizeLegibility;
 }
 
 .slide h2 {
-	color: #444;
+	color: #999;
 	margin-top: 0;
 	margin-left: .5em;
 }
 
 .slide p {
-	color: #222;
+	color: #aaa;
 	margin-left: 2em;
 }
 
@@ -53,12 +55,12 @@
 }
 
 @media screen and (max-device-width: 480px) {
-	.slide-view-module {
-		margin-top: 2em;
-	}
-	
 	.slide {
 		font-size: 90%;
+	}
+	
+	.slide-container {
+		margin-top: 1em;
 	}
 
 	.slide .slide-layout-title {

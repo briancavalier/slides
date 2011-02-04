@@ -53,7 +53,8 @@ define([], function() {
 	/*
 		Function: addClass
 		Adds the supplied class to the supplied DOM node--will not add a duplicate
-		class name if the supplied class is already present.
+		class name if the supplied class is already present.  Simple-minded, doesn't
+		handle arrays, multiple class names as input, doesn't check node type, etc.
 		
 		Parameters:
 			node - DOM node to which to add clss
@@ -61,10 +62,10 @@ define([], function() {
 	*/
 	function addClass(node, clss) {
 		var cn = node.className,
-			r = new RegExp("\\s+" + clss + "|" + clss + "\\s+");
+			cns = " " + cn + " ";
 		
 		if(cn) {
-			if(cn !== clss && !r.test(cn)) {
+			if(cn !== clss && cns.indexOf(clss) < 0) {
 				node.className += " " + clss;
 			}
 		} else {
@@ -72,7 +73,7 @@ define([], function() {
 		}
 	}
 	
-	// Add touch support hint
+	// Add touch support hint, a la Modernizr
 	addClass(html, supportsTouch ? "touch" : "no-touch");
 	
 	/*
@@ -132,7 +133,7 @@ define([], function() {
 				}
 			};
 			
-			return true;
+			return ret;
 		};
 		
 	}

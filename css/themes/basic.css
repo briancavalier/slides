@@ -52,13 +52,8 @@ em {
 	line-height: 1.25em;
 }
 
-.slide-container {
-	position: relative;
-	overflow: hidden;
-	height: 100%;
-}
-
 .slide-view-module {
+	position: relative;
 	overflow: hidden;
 	width: 100%;
 	height: 100%;
@@ -75,7 +70,6 @@ em {
 	width: 80%;
 	min-height: 5em;
 	margin: 0 auto;
-	opacity: .25;
 }
 
 .slide-current {
@@ -100,9 +94,9 @@ em {
 }
 
 @media screen and (max-device-width: 480px) {
-	body {
+/*	body {
 		height: auto;
-	}
+	}*/
 	.slide {
 		height: auto;
 		font-size: 100%;
@@ -115,9 +109,14 @@ em {
 	}
 	
 	footer {
-/*		margin: .5em auto;*/
-/*		width: 80%;*/
+		margin-top: 2em;
 		min-width: 0;
 		font-size: .75em;
+	}
+}
+
+@media screen and (max-device-width: 480px) and (orientation: landscape) {
+	footer {
+		font-size: .4em;
 	}
 }
