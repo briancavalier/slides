@@ -62,7 +62,7 @@
 		// bootstrap the presentation.
 		require(
 			[
-				'hc/slides/PresentationModel',        // Model, i.e. slide content
+				'hc/slides/SingleFilePresentationModel',        // Model, i.e. slide content
 				'hc/slides/SlideView',                // View
 				'hc/slides/PresentationController',   // Controller
 				'cssx/css!css/themes/gray/theme.css', // Slide theme
@@ -74,7 +74,7 @@
 				
 				// Create the view and hand it a model, then create a controller to
 				// control the view.
-				var slides = View(document.getElementsByClassName('slide-container')[0], Model('slides'));
+				var slides = View(document.getElementsByClassName('slide-container')[0], Model('slides/slides.html'));
 				
 				Controller(slides);
 			});
@@ -98,7 +98,7 @@
 		<!-- Extra notes -->
 		<footer>
 			<p class="slide-no-touch">Use <em>left/right arrows, or space</em> to move between slides</p>
-			<p class="slide-touch"><em>Touch near the right and left edges</em> of your screen to move between slides</p>
+			<p class="slide-touch"><em>Swipe left or right</em> to move between slides</p>
 			<p>Copyright &copy; 2011 Brian Cavalier</p>
 		</footer>
 	</div>

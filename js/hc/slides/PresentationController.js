@@ -35,7 +35,7 @@ define([], function() {
 	*/
 	function getHash() {
 		var h = window.location.hash;
-		return h.length > 1 && h[0] === '#' ? (1*h.substring(1)) : 0;
+		return h.length > 1 && h[0] === '#' ? (Math.max(0, 1*h.substring(1))) : 0;
 	}
 	
 	/*
@@ -112,8 +112,8 @@ define([], function() {
 							ret = false;
 							
 						} else {
-							stopEvent(e);
-							next = e.changedTouches[0].pageX > (window.innerWidth/2);
+							// stopEvent(e);
+							// next = e.changedTouches[0].pageX > (window.innerWidth/2);
 						}
 
 						if(next != undef) {
@@ -186,7 +186,8 @@ define([], function() {
 		};
 		
 		// Goto first slide
-		slideView.go(getHash()).then(function() {
+		slideView.go(getHash()).then(function(result) {
+			success(result);
 			body.className = body.className.replace(/\s*presentation-loading\s*/g, " ");
 		});
 		

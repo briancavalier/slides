@@ -13,6 +13,7 @@ define([], function() {
 		slideAfterState = 'slide slide-after',
 		slideCurrentState = 'slide slide-current',
 		slideContainerIdentity = 'slide-view-module',
+		slideContainerLoadingState = slideContainerIdentity + ' slide-view-loading',
 		slideContainerTransitioningState = slideContainerIdentity + ' slide-transitioning',
 		undef;
 	
@@ -80,6 +81,8 @@ define([], function() {
 			var p = slideModel.get(slide);
 			if(slide == current) {
 				return p;
+			} else if(slide < 0) {
+				
 			}
 			
 			function reject(num) {
@@ -87,7 +90,7 @@ define([], function() {
 			}
 			
 			if(!slides[slide]) {
-				container.className = slideContainerTransitioningState;
+				// container.className = slideContainerTransitioningState;
 				p.then(
 					function(result) {
 						addSlide(slide, result.content);
@@ -157,7 +160,7 @@ define([], function() {
 
 		// Create a controlled container to hold slides
 		container = document.createElement('div');
-		container.className = slideContainerIdentity;
+		container.className = slideContainerLoadingState;
 		slideContainer.innerHTML = '';
 		slideContainer.appendChild(container);
 		

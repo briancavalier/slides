@@ -7,7 +7,7 @@
 /*
 	Class: PresentationModel
 */
-define(['require'], function(require) {
+define(['require', './Promise'], function(require, Promise) {
 
 	var 
 		// Default number of slides to preload
@@ -15,55 +15,6 @@ define(['require'], function(require) {
 		// Slides will only be preloaded when there are this
 		// many already-loaded slides beyond the current slide
 		preloadThreshold = 2;
-
-	/*
-		Constructor: promise
-		
-		Returns:
-		a new promise
-	*/
-	function promise() {
-		var value,
-			complete = 0,
-			callbacks = [];
-			
-		function then(resolver, rejecter) {
-			if(complete > 0) {
-				if(resolver) resolver(value);
-			} else if (complete < 0) {
-				if(rejecter) rejecter(value);
-			} else {
-				callbacks.push({ resolve: resolver, reject: rejecter });
-			}
-			return this;
-		}
-			
-		return {
-			resolve: function resolve(result) {
-				complete = 1;
-				value = result;
-				for (var i=0; i < callbacks.length; i++) {
-					var cb = callbacks[i].resolve;
-					if(cb) cb(value);
-				};
-			},
-			
-			reject: function reject(err) {
-				complete = -1;
-				value = err;
-				for (var i=0; i < callbacks.length; i++) {
-					var cb = callbacks[i].reject;
-					if(cb) cb(value);
-				};
-			},
-
-			then: then,
-			
-			safe: {
-				then: then
-			}
-		};
-	}
 
 	/*
 		Constructor: PresentationModel
@@ -114,7 +65,7 @@ define(['require'], function(require) {
 				* content - the slide content
 		*/
 		function getSlide(slide, preloadCount) {
-			var p = promise(),
+			var p = new Promise(),
 				slideModule = 'text!' + slidePath + '/' + slide + '.html';
 
 			if(0 <= slide) {
@@ -139,7 +90,7 @@ define(['require'], function(require) {
 				p.reject(slide);
 			}
 			
-			return p.safe;
+			return p.safe();
 		}
 
 		return {
