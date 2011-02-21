@@ -62,7 +62,8 @@
 		// bootstrap the presentation.
 		require(
 			[
-				'hc/slides/SingleFilePresentationModel',        // Model, i.e. slide content
+				'hc/slides/SingleFilePresentationModel',        // Model, i.e. slide content from a single HTML file
+				// 'hc/slides/PresentationModel',        // Use this Model instead if you have a dir full of html files
 				'hc/slides/SlideView',                // View
 				'hc/slides/PresentationController',   // Controller
 				'cssx/css!css/themes/gray/theme.css', // Slide theme
@@ -72,9 +73,12 @@
 				// The relative path to the slides
 				var slidePath = 'slides';
 				
-				// Create the view and hand it a model, then create a controller to
-				// control the view.
+				// Create the view and hand it a model, in this case SingleFilePresentationModel that we point
+				// at an html files containing all the slides.
 				var slides = View(document.getElementsByClassName('slide-container')[0], Model('slides/slides.html'));
+				
+				// Of, if you prefer to use a directory full of files, use PresentationModel
+				// var slides = View(document.getElementsByClassName('slide-container')[0], Model('slides'));
 				
 				Controller(slides);
 			});
