@@ -21,7 +21,7 @@
  * it is invoked the first time.  If the load event works, it is used on
  * every successive load.  Therefore, browsers that support the load event will
  * just work (i.e. no need for hacks!).  FYI, Feature-detecting the load
- * event is tricky since most borwsers have a non-functional onload property.
+ * event is tricky since most browsers have a non-functional onload property.
  *
  * The universal work-around watches a stylesheet until its rules are
  * available (not null or undefined).  There are nuances, of course, between
@@ -57,14 +57,14 @@
  * parse them, causing an error in the plugin.
  *
  * usage:
- *      require('css!myproj/comp'); // load and wait for myproj/comp.css
+ *      require(['css!myproj/comp']); // load and wait for myproj/comp.css
  *      define(['css!some/folder/file'], {}); // wait for some/folder/file.css
- *      require('css!myWidget!nowait');
+ *      require(['css!myWidget!nowait']);
  *
  * Tested in:
  *      Firefox 1.5, 2.0, 3.0, 3.5, 3.6, and 4.0b6
  *      Safari 3.0.4, 3.2.1, 5.0
- *      Chrome 7 (8 is partly b0rked)
+ *      Chrome 7 (8+ is partly b0rked)
  *      Opera 9.52, 10.63, and Opera 11.00
  *      IE 6, 7, and 8
  *      Netscape 7.2 (WTF? SRSLY!)
@@ -83,27 +83,29 @@ var
 	ce = 'createElement',
 	// failed is true if RequireJS threw an exception
 	failed = false,
+// true if the onload event handler works
+	useOnload,
 	undef;
 
 // failure detection:
-require.onError = (function (orig) {
-	return function () {
-		failed = true;
-		orig.apply(this, arguments);
-	}
+if (require.onError) {
+	require.onError = (function (orig) {
+		return function () {
+			failed = true;
+			orig.apply(this, arguments);
+		}
 })(require.onError);
-
+}
 /***** load-detection functions *****/
 
 function loadHandler (params, cb) {
-	// We're using 'readystatechange' because webkit falsely reports it supports
-	// the 'load' event. IE and Opera happily support either.
-	// FF? none of the above.  See the loadDetector function for more info.
+	// We're using 'readystatechange' because IE and Opera happily support both
 	var link = params.link;
 	link[orsc] = link[ol] = function () {
 		if (!link.readyState || link.readyState == 'complete') {
-				link[orsc] = link[ol] = null;
-				cb();
+			useOnload = true;
+			cleanup(params);
+			cb();
 		}
 	};
 }
@@ -151,23 +153,9 @@ function createLink (doc, optHref) {
 	return link;
 }
 
-function hasEvent (tag, event) {
-    // Detects if an event is supported on an element by
-    // checking if an event handler function was created.
-    // Note: Does not work in IE6-8. Only good for other browsers.
-    // This uses a bastardization of @kangax's method:
-    // http://perfectionkills.com/detecting-event-support-without-browser-sniffing/
-    // (Thanks to @bstakes for the heads up!)
-    var handler = 'on' + event,
-        el = findDoc()[ce](tag),
-        has = handler in el;
-    el.setAttribute(handler, 'return;');
-    return has && typeof el[handler] == 'function';
-}
-
 // Chrome 8 hax0rs!
-// This is an ugly hack needed by Chrome 8 which no longer waits for rules
-// to be applied the the document before exposing them to javascript.
+// This is an ugly hack needed by Chrome 8+ which no longer waits for rules
+// to be applied to the document before exposing them to javascript.
 // Unfortunately, this routine will never fire for XD stylsheets since
 // Chrome will also throw an exception if attempting to access the rules
 // of an XD stylesheet.  Therefore, there's no way to detect the load
@@ -222,6 +210,7 @@ function isLinkReady (link) {
 function ssWatcher (params, cb) {
     // watches a stylesheet for loading signs.
     if (isLinkReady(params.link)) {
+		cleanup(params);
         cb();
     }
     else if (!failed) {
@@ -231,23 +220,22 @@ function ssWatcher (params, cb) {
 }
 
 function loadDetector (params, cb) {
-    // When this function figures out which load detector works, it overwrites
-    // itself to use that function every time. It would be nice to use
-    // onload everywhere, but FF4b7 doesn't support it (even though it'll
-    // pass kangax's test (see hasEvent method for more info),
-    // and webkit doesn't support it (even though it has an 'onload'
-    // property). The onload handler only works in IE and Opera.
-    // Detecting it cross-browser is completely impossible, but the
-    // hasEvent method detects it in Opera and should detect it
-    // in future browsers (hopefully).
+	// It would be nice to use onload everywhere, but the onload handler
+	// only works in IE and Opera.
+	// Detecting it cross-browser is completely impossible, too, since
+	// THE BROWSERS ARE LIARS! DON'T TELL ME YOU HAVE AN ONLOAD PROPERTY
+	// IF IT DOESN'T DO ANYTHING!
+	function cbOnce () {
+		cbOnce = function () {};
+		cb();
+	}
+	loadHandler(params, cbOnce);
+	if (!useOnload) ssWatcher(params, cbOnce);
+}
 
-    if (orsc in params.link || hasEvent('link', 'load')) {
-        (loadDetector = loadHandler)(params, cb); // intentional function assignment, FU jslint
-    }
-    else {
-        (loadDetector = ssWatcher)(params, cb); // intentional function assignment, FU jslint
-    }
-
+function cleanup (params) {
+	var link = params.link;
+	link[orsc] = link[ol] = null;
 }
 
 /***** finally! the actual plugin *****/
