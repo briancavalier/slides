@@ -1,0 +1,3 @@
+[submodule "js/wire"]
+	path = js/wire
+	url = github:briancavalier/wire

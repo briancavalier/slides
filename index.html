@@ -51,38 +51,23 @@
 				baseUrl: "js",
 				paths: {
 					"slides": "../slides",
-					"css": "../css"
+					"css": "../css",
+					"wire": "wire/wire"
 				}
+			};
+
+			global.wire = {
+				slidesPath: "slides/slides.html",
+				theme: [
+					{ module: 'cssx/css!css/themes/gray/theme.css' }, // Slide theme
+					{ module: 'cssx/css!css/themes/fade.css' }        // Slide transition
+				]
 			};
 		})(window);
 	</script>
 	<script type="text/javascript" src="js/require.js"></script>
-	<script type="text/javascript">
-		// Load the Model, View, Controller, theme, and transition css, then
-		// bootstrap the presentation.
-		require(
-			[
-				'hc/slides/SingleFilePresentationModel',        // Model, i.e. slide content from a single HTML file
-				// 'hc/slides/PresentationModel',        // Use this Model instead if you have a dir full of html files
-				'hc/slides/SlideView',                // View
-				'hc/slides/PresentationController',   // Controller
-				'cssx/css!css/themes/gray/theme.css', // Slide theme
-				'cssx/css!css/themes/fade.css'        // Slide transition
-			],
-			function(Model, View, Controller) {
-				// The relative path to the slides
-				var slidePath = 'slides';
-				
-				// Create the view and hand it a model, in this case SingleFilePresentationModel that we point
-				// at an html files containing all the slides.
-				var slides = View(document.getElementsByClassName('slide-container')[0], Model('slides/slides.html'));
-				
-				// Of, if you prefer to use a directory full of files, use PresentationModel
-				// var slides = View(document.getElementsByClassName('slide-container')[0], Model('slides'));
-				
-				Controller(slides);
-			});
-	</script>
+	<script type="text/javascript" src="js/wire/wire.js" data-wire-spec="slides-spec"></script>
+
 </head>
 
 <!-- Avoid any FUOC by adding presentation-loading, which the framework
@@ -95,7 +80,7 @@
 		</header>
 
 		<!-- The container to hold the slides -->
-		<div class="slide-container">
+		<div id="slide-container">
 
 		</div>
 
