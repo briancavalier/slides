@@ -57,7 +57,8 @@
 			global.wire = {
 				plugins: [{ module: 'wire/dom' }],
 				slidesPath: "slides/slides.html",
-				slideContainer: { $ref: 'dom!slide-container' }
+				slideContainer: { $ref: 'dom!slide-container' },
+				loadingClass: "presentation-loading"
 			};
 		})(window);
 	</script>

@@ -22,7 +22,7 @@ wire({
 }).then(
 function(context) {
 	var body = document.body;
-	body.className = body.className.replace(/\s*presentation-loading\s*/g, " ");
+	body.className = body.className.replace(new RegExp("\s*" + context.loadingClass + "\s*", "g"), " ");
 },
 function(err) {
 	console.log(err);

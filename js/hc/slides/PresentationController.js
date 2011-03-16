@@ -160,9 +160,7 @@ define([], function() {
 		Returns:
 		a new PresentationController
 	*/
-	return function PresentationController(slideView) {
-		body.className += " presentation-loading";
-		
+	return function PresentationController(slideView) {		
 		window.onkeyup = function(e) {
 			var key = (window.event) ? event.keyCode : e.keyCode,
 				ret = true;
