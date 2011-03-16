@@ -188,7 +188,6 @@ define([], function() {
 		// Goto first slide
 		slideView.go(getHash()).then(function(result) {
 			success(result);
-			body.className = body.className.replace(/\s*presentation-loading\s*/g, " ");
 		});
 		
 		if('onhashchange' in window) {

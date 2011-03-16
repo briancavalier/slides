@@ -51,17 +51,15 @@
 				baseUrl: "js",
 				paths: {
 					"slides": "../slides",
+					"cssx": "cssx/src/cssx",
 					"css": "../css",
 					"wire": "wire/wire"
 				}
 			};
 
 			global.wire = {
-				slidesPath: "slides/slides.html",
-				theme: [
-					{ module: 'cssx/css!css/themes/gray/theme.css' }, // Slide theme
-					{ module: 'cssx/css!css/themes/fade.css' }        // Slide transition
-				]
+				debug: { module: 'wire/debug' },
+				slidesPath: "slides/slides.html"
 			};
 		})(window);
 	</script>
