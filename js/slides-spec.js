@@ -1,10 +1,6 @@
 wire({
 	theme: { module: 'cssx/css!css/themes/gray/theme.css' }, // Slide theme
 	transition: { module: 'cssx/css!css/themes/fade.css' },    // Slide transition
-	plugins: [
-		{ module: 'wire/debug' },
-		{ module: 'wire/dom' }
-	],
 	model: {
 		create: {
 			module: 'hc/slides/SingleFilePresentationModel',
@@ -14,7 +10,7 @@ wire({
 	view: {
 		create: {
 			module: 'hc/slides/SlideView',
-			args: [{ $ref: 'dom!slide-container' }, { $ref: 'model' }]
+			args: [{ $ref: 'slideContainer' }, { $ref: 'model' }]
 		}
 	},
 	controller: {
@@ -25,7 +21,6 @@ wire({
 	}
 }).then(
 function(context) {
-	console.log(context);
 	var body = document.body;
 	body.className = body.className.replace(/\s*presentation-loading\s*/g, " ");
 },

@@ -41,8 +41,6 @@
 		}
 	</style>
 	
-	<!-- <script src="js/modernizr-1.6.min.js" type="text/javascript" charset="utf-8"></script> -->
-
 	<!-- Configure RequireJS to load slides from the slides dir, and css from
 	     the css dir.  Note that these are relative to the location of require.js -->
 	<script type="text/javascript">
@@ -52,19 +50,19 @@
 				paths: {
 					"slides": "../slides",
 					"cssx": "cssx/src/cssx",
-					"css": "../css",
-					"wire": "wire/wire"
+					"css": "../css"
 				}
 			};
 
 			global.wire = {
-				debug: { module: 'wire/debug' },
-				slidesPath: "slides/slides.html"
+				plugins: [{ module: 'wire/dom' }],
+				slidesPath: "slides/slides.html",
+				slideContainer: { $ref: 'dom!slide-container' }
 			};
 		})(window);
 	</script>
 	<script type="text/javascript" src="js/require.js"></script>
-	<script type="text/javascript" src="js/wire/wire.js" data-wire-spec="slides-spec"></script>
+	<script type="text/javascript" src="js/wire.js" data-wire-spec="slides-spec"></script>
 
 </head>
 
