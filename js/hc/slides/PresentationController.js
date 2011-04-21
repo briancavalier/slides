@@ -164,6 +164,11 @@ define([], function() {
 		window.onkeyup = function(e) {
 			var key = (window.event) ? event.keyCode : e.keyCode,
 				ret = true;
+
+			// Don't handle slide changes when modifiers are down. Only
+			// plain arrow keys change slides.
+			if(e.altKey||e.ctrlKey||e.metaKey||e.shiftKey) return true;
+
 			switch(key) {
 				case 37: // Left arrow
 				// case 38: // Up arrow, used for keyboard scrolling
@@ -171,7 +176,6 @@ define([], function() {
 					stopEvent(e);
 					ret = false;
 					break;
-				case 32: // Space
 				case 39: // Right arrow
 				// case 40: // Down arrow, used for keyboard scrolling
 					slideView.next().then(success);
