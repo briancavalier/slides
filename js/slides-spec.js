@@ -1,5 +1,4 @@
 define({
-	debug: { module: 'wire/debug' },
 	theme:      { module: 'cssx/css!css/themes/gray/theme.css' },
 	transition: { module: 'cssx/css!css/themes/fade.css' },
     model: {
