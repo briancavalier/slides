@@ -7,34 +7,48 @@
     license at the following url: http://www.opensource.org/licenses/afl-3.0.php.
 */
 define(
-	[
-		'cssx/sniff'
-	],
-	function (sniff) {
+	function () {
+
+		var scrollbarPropRx = /-cssx-scrollbar-(width|height)/g;
+
+		// TODO: combine these two functions into one
+
+		function getScrollbarSize () {
+			//  summary: figures out the height and width of the scrollbars on this system.
+			//  something like this exists in dojox, but we don't want to rely on dojox
+			//  Returns an object with w and h properties (width and height, Number) in pixels
+			var sbSize = {w: 15, h: 15}; // default
+			var testEl = document.createElement('div');
+			testEl.style.cssText = 'width:100px;height:100px;overflow:scroll;bottom:100%;right:100%;position:absolute;visibility:hidden;';
+			document.body.appendChild(testEl);
+			try {
+				sbSize = {
+					w: testEl.offsetWidth - Math.max(testEl.clientWidth, testEl.scrollWidth),
+					h: testEl.offsetHeight - Math.max(testEl.clientHeight, testEl.scrollHeight)
+				};
+				document.body.removeChild(testEl);
+			}
+			catch (ex) {
+				// squelch
+			}
+			return sbSize;
+		}
 
 		function getSbSize () {
-			var sbSize = sniff.getScrollbarSize();
+			var sbSize = getScrollbarSize();
 			sbSize = { w: sbSize.w + 'px', h: sbSize.h + 'px' };
 			getSbSize = function () { return sbSize; };
 			return sbSize;
 		}
 
+		function replaceScrollbarDim (full, which) {
+			return which == 'width' ? getSbSize().w : getSbSize().h;
+		}
+
 		return {
 
-			onProperty: function (processor, parseArgs) {
-				// processor: the cssx processor in context
-				// parseArgs:
-				// 		propName: String
-				// 		value: String
-				// 		selectors: String|Array
-				// 		sheet: String
-				if (/-cssx-scrollbar/.test(parseArgs.propValue)) {
-					processor.appendRule({
-						selectors: parseArgs.selectors,
-						propName: parseArgs.propName,
-						propValue: parseArgs.propValue === '-cssx-scrollbar-width' ? getSbSize().w : getSbSize().h
-					});
-				}
+			onValue: function (prop, value, selectors) {
+				return value.replace(scrollbarPropRx, replaceScrollbarDim);
 			}
 
 		};

@@ -8,113 +8,69 @@
 
     This cssx plugin fixes lack of box offset positioning in IE6.
 
-    TODO: the logic in here could be improved a bit
+    TODO: the logic in the global functions may be improved a bit
 
 */
-define(
-	function () {
+(function (global) {
 
-		return {
-
-			onProperty: function (processor, parseArgs) {
-				// processor: the cssx processor in context
-				// parseArgs:
-				// 		propName: String
-				// 		value: String
-				// 		selectors: String|Array
-				// 		sheet: String
-
-				var prop = parseArgs.propName,
-					value = parseArgs.propValue,
-					result;
-
-				if (prop === 'bottom' && value !== 'auto') {
-					// optimize common case in which bottom is in pixels already or is 0 (IE always uses '0px' for '0')
-					if (value.match(/px$/)) {
-						result = {
-							selectors: parseArgs.selectors,
-							propName: 'height',
-							propValue: 'expression(cssx_boxOffsets_checkBoxHeight(this, ' + parseInt(value) + '))'
-						};
-					}
-					else {
-						result = [
-							{
-								selectors: parseArgs.selectors,
-								propName: 'height',
-								propValue: 'expression(cssx_boxOffsets_checkBoxHeight(this))'
-							},
-							{
-								selectors: parseArgs.selectors,
-								propName: 'bottom',
-								propValue:'expression("' + value + '")'
-							}
-						];
-					}
+	define({
+	
+		bottom: function (prop, value, selectors) {
+			if (value != 'auto') {
+				// optimize common case in which bottom is in pixels already or is 0 (IE always uses '0px' for '0')
+				if (value.match(/px$/)) {
+					return 'height:expression(cssx_boxOffsets_checkBoxHeight(this,' + parseInt(value) + '));\nbottom:' + value + ';\n';
 				}
-				else if (prop === 'right' && value !== 'auto') {
-					if (value.match(/px$/)) {
-						result = {
-							selectors: parseArgs.selectors,
-							propName: 'width',
-							propValue: 'expression(cssx_boxOffsets_checkBoxWidth(this, ' + parseInt(value) + '))'
-						};
-					}
-					else {
-						result = [
-							{
-								selectors: parseArgs.selectors,
-								propName: 'width',
-								propValue: 'expression(cssx_boxOffsets_checkBoxWidth(this))'
-							},
-							{
-								selectors: parseArgs.selectors,
-								propName: 'right',
-								propValue:'expression("' + value + '")'
-							}
-						];
-					}
+				else {
+					return 'height:expression(cssx_boxOffsets_checkBoxHeight(this));\nbottom:expression("' + value + '");\n';
 				}
-
-				if (result) {
-					processor.appendRule(result);
-				}
-
 			}
+		},
 
-		};
+		right: function (prop, value, selectors) {
+			if (value != 'auto') {
+				// optimize common case in which right is in pixels already or is 0 (IE always uses '0px' for '0')
+				if (value.match(/px$/)) {
+					return 'width:expression(cssx_boxOffsets_checkBoxWidth(this,' + parseInt(value) + '));\nright:' + value + ';\n';
+				}
+				else {
+					return 'width:expression(cssx_boxOffsets_checkBoxWidth(this));\nright:expression("' + value + '");\n';
+				}
+			}
+		}
 
+	});
+
+	// unfortunately, these functions must be global
+
+	global['cssx_boxOffsets_checkBoxHeight'] = function (node, bVal) {
+		var style = node.currentStyle,
+			parent = node.offsetParent,
+			doc = node.ownerDocument;
+		// are we using box offset positioning? (Note: assumes position:fixed is fixed for IE6)
+		if (parent && style.top != 'auto' && style.position == 'absolute' || style.position == 'fixed') {
+			var height = parent == doc.body ? doc.body.clientHeight : parent.offsetHeight
+					- (node.offsetHeight - node.clientHeight) /* border height */
+					- parseInt(style.paddingTop)- parseInt(style.paddingBottom) /* padding height if px */;
+			return height - node.offsetTop - (bVal != null ? bVal : node.style.pixelBottom) + 'px';
+		}
+		else
+			return '';
+	};
+
+	global['cssx_boxOffsets_checkBoxWidth'] = function (node, rVal) {
+		var style = node.currentStyle,
+			parent = node.offsetParent,
+			doc = node.ownerDocument;
+		// are we using box offset positioning? (Note: assumes position:fixed is fixed for IE6)
+		if (parent && style.left != 'auto' && style.position == 'absolute' || style.position == 'fixed') {
+			var width = (parent == doc.body ? doc.body.clientWidth : parent.offsetWidth)
+					- (node.offsetWidth - node.clientWidth) /* border width */
+					- parseInt(style.paddingLeft)- parseInt(style.paddingRight) /* padding width if px */;
+			return width - node.offsetLeft - (rVal != null ? rVal : node.style.pixelRight) + 'px';
+		}
+		else
+			return '';
 	}
-);
 
-// it's easiest if these functions are global
-
-function cssx_boxOffsets_checkBoxHeight (node, bVal) {
-    var style = node.currentStyle,
-        parent = node.offsetParent,
-		doc = node.ownerDocument;
-    // are we using box offset positioning? (Note: assumes position:fixed is fixed for IE6)
-    if (parent && style.top != 'auto' && style.position == 'absolute' || style.position == 'fixed') {
-        var height = parent == doc.body ? doc.body.clientHeight : parent.offsetHeight
-                - (node.offsetHeight - node.clientHeight) /* border height */
-                - parseInt(style.paddingTop)- parseInt(style.paddingBottom) /* padding height if px */;
-        return height - node.offsetTop - (bVal != null ? bVal : node.style.pixelBottom) + 'px';
-    }
-    else
-        return '';
-}
-
-function cssx_boxOffsets_checkBoxWidth (node, rVal) {
-    var style = node.currentStyle,
-        parent = node.offsetParent,
-		doc = node.ownerDocument;
-    // are we using box offset positioning? (Note: assumes position:fixed is fixed for IE6)
-    if (parent && style.left != 'auto' && style.position == 'absolute' || style.position == 'fixed') {
-        var width = (parent == doc.body ? doc.body.clientWidth : parent.offsetWidth)
-                - (node.offsetWidth - node.clientWidth) /* border width */
-                - parseInt(style.paddingLeft)- parseInt(style.paddingRight) /* padding width if px */;
-        return width - node.offsetLeft - (rVal != null ? rVal : node.style.pixelRight) + 'px';
-    }
-    else
-        return '';
-}
+}(this));

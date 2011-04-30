@@ -15,13 +15,10 @@ define(
 
 		return {
 
-			onProperty: function (processor, parseArgs, ctx) { //(/* String */ propName, /* String */ value, /* String|Array */ selectors, /* String */ ss) {
-				if (parseArgs.propName == 'opacity') {
-					var rule = { selectors: parseArgs.selectors };
-					rule[ctx.propName] = parseArgs.propValue;
-					processor.addRule(rule);
-				}
+			opacity: function (prop, value, selectors) {
+				return sniff.cssProp(prop, true) + ':' + value + ';';
 			}
+
 		};
 
 	}

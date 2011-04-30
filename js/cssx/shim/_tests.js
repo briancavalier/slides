@@ -17,28 +17,22 @@ define({
 	//    sniff: Object - the cssx/sniff module, with many sniffing methods
 	//    ctx: Object - a place to store stuff that the shim might need (e.g. vendor prefix)
 
-	inlineBlock: {
-		test: function (env, sniff) { return sniff.cssValue('display', 'inline-block'); },
-		name: './shim/inlineBlock'
-	},
+	/***** properties and vaues *****/
 
-	boxOffsets: {
+	minmax: {
 		test: function (env, sniff) {
-			// Note: this is an inference test. A true test would require
-			// setting top and bottom of an absolutely positioned node and
-			// verifying the height.
-			// FIXME: do a true test?
-			return sniff.cssValue('position', 'fixed');
+			return sniff.cssProp('maxWidth');
 		},
-		name: './shim/boxOffsets'
+		name: './shim/minmax'
 	},
 
 	opacity: {
 		// non-ie opacity
 		test: function (env, sniff, ctx) {
 			// store the property name (may have vendor prefix)
-			ctx.propName = sniff.cssProp('opacity', true);
-			return ctx.propName !== 'opacity';
+			ctx.opacityName = sniff.cssProp('opacity', true);
+			ctx.filterName = sniff.cssProp('filter', true);
+			return ctx.opacityName == 'opacity' || ctx.filterName;
 		},
 		name: './shim/opacity'
 	},
@@ -53,9 +47,73 @@ define({
 		name: './shim/ieOpacity'
 	},
 
+	inlineBlock: {
+		test: function (env, sniff) {
+			// Note: this is an inference test. A true test would require
+			// setting height of an inline-block node and
+			// verifying the height which would need to wait for domready.
+			// FIXME: do a true test?
+			return sniff.cssProp('maxWidth');
+		},
+		name: './shim/inlineBlock'
+	},
+
+	boxOffsets: {
+		test: function (env, sniff) {
+			// Note: this is an inference test. A true test would require
+			// setting top and bottom of an absolutely positioned node and
+			// verifying the height which would need to wait for domready.
+			// FIXME: do a true test?
+			return sniff.cssProp('maxWidth');
+		},
+		name: './shim/boxOffsets'
+	},
+
 	scrollbar: {
 		test: function () { return false; },
 		name: './shim/scrollbar'
+	},
+
+	/***** selectors *****/
+
+	hoverPseudo: {
+		test: function (env, sniff) {
+			// Note: this is an inference test.
+			// FIXME: do a true test?
+			return sniff.cssProp('maxWidth');
+		},
+		name: './shim/hover'
+	},
+
+	// TODO: get attrSelector working
+	//attrSelector: {
+	//	test: function (env, sniff) {
+	//		// Note: this is an inference test.
+	//		// FIXME: do a true test?
+	//		return sniff.cssProp('maxWidth');
+	//	},
+	//	name: './shim/attrSelector'
+	//},
+
+	comboSelector: {
+		test: function (env, sniff) {
+			// Note: this is an inference test.
+			// FIXME: do a true test?
+			return sniff.cssProp('maxWidth');
+		},
+		name: './shim/comboSelector'
+	},
+
+	// Note: child selector shim needs to run after other shims because it
+	// removes the selectors entirely and replaces them with a new one.
+	// Fix this somehow?
+	childSelector: {
+		test: function (env, sniff) {
+			// Note: this is an inference test.
+			// FIXME: do a true test?
+			return sniff.cssProp('maxWidth');
+		},
+		name: './shim/childSelector'
 	}
 
 });

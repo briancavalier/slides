@@ -7,13 +7,45 @@
     license at the following url: http://www.opensource.org/licenses/afl-3.0.php.
 */
 
-define(['./common'], function (common) {
+define(function () {
 
-	var isArray = common.isArray,
-		partial = common.partial,
-		every = common.every;
+	var toString = {}.toString,
+		slice = [].slice;
 
-	return function (/* Object */ cb) {
+	function isArray (o) {
+		return toString.call(o) == '[object Array]';
+	}
+
+	function partial (func) {
+		// pre-applies arguments to a function
+		var args = slice.call(arguments, 1);
+		return function () {
+			return func.apply(this, args.concat(slice.call(arguments)));
+		}
+	}
+
+	function every (a, cb) {
+		var e = true, i, len = a.length;
+		for (i = 0; i < len && e; i++) {
+			e = cb(a[i], i, a);
+		}
+		return e;
+	}
+
+	function F () {}
+	function beget (base, props) {
+		F.prototype = base;
+		var o = new F();
+		if (props) {
+			for (var p in props) {
+				o[p] = props[p];
+			}
+		}
+		delete F.prototype;
+		return o;
+	}
+
+	return function (/* Object */ cb, /* Object? */ ctx) {
 		//  summary: A fast, flexible event-based CSS TEXT parser in under 3kB! (minified)
 		//      See also the cssx.cssDomParser!
 		//  cb: Object
@@ -87,7 +119,6 @@ define(['./common'], function (common) {
 
 		var
 			// context in which to execute callbacks
-			ctx,
 			// flag to detect if user has stopped (c is short for "continue")
 			c = true,
 			// map of the top-level state machine transition functions.
@@ -101,10 +132,12 @@ define(['./common'], function (common) {
 				'<!--': cd,
 				'-->': cd,
 				'"': partial(skip, /[^\\]"/g, true),
-				"'": partial(skip, /[^\\]'/g, true)
+				"'": partial(skip, /[^\\]'/g, true),
+				'""': passthru,
+				"''": passthru
 			},
 			// regex to detect state transitions
-			rxSs = /\s*(.*?)\s*?(,|;|@|{|}|\/\*|"|'|<!--|-->)/g,
+			rxSs = /\s*(.*?)\s*?(,|;|@|{|}|\/\*|""?|''?|<!--|-->)/g,
 			// regex to extract import url (and media type)
 			rxUrl = /(?:url\s*\((["'])?(.*?)\1?\)|(["'])(.*?)\3)\s*(.*|$)/,
 			// media types regex
@@ -118,13 +151,13 @@ define(['./common'], function (common) {
 			//  w: String|Array - The raw text of the sheet to parse or a list of several sheets.
 			//  return Boolean. true == parse was not stopped; false == it was stopped.
 			c = true;
-			ctx = cb.context || this;
+			ctx = ctx || cb.context || this;
 			// If mediaTypes were supplied...
 			if (cb.mediaTypes)
 				// ...recreate the media types regex.
 				rxMTypes = new RegExp('\b(?:' + cb.mediaTypes.join('|') + ')\b', 'i');
 			else
-				rxMTypes = /\b(?:screen|all)\b/i;
+				rxMTypes = /\b(?:screen|all|handheld)\b/i;
 			if (!isArray(w)) w = [w];
 			every(w, function (ss) {
 				if (!cb.onSheet || cb.onSheet.call(ctx, ss) !== false && c) {
@@ -323,9 +356,11 @@ define(['./common'], function (common) {
 			rxSs.lastIndex = rxSkip.lastIndex;
 		}
 
+		function passthru (ss, sd) { }
+
 		function dn (ss, sd, state) {
 			// props: String|Object. The new state or an object with the overridden properties.
-			var newSd = common.beget(sd, {state: state});
+			var newSd = beget(sd, {state: state});
 			iter(ss, newSd);
 			sd.sel = [];
 			sd.pre = [];

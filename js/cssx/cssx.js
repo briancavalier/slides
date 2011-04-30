@@ -18,55 +18,52 @@
  * set it to "all" to ignore all plugin names found in css files.
  * Use the !inspect loader suffix or directive to override cssxIgnore.
  *
- * TODO: remove preloads
- * cssxPreload: Array
- * Set cssxPreload to a list of names of plugins that should be loaded
- * before processing any css files. Unless overridden by an !ignore
- * loader suffix or directive in a css file, all css files
- * will be scanned by these plugins.
- *
- * TODO: remove cssxAuto
- * cssxAuto: Boolean, default = true
- * Set cssxAuto to false to prevent cssx from attempting to
- * automatically download and apply plugins that are discovered
- * in css rules.  For instance, if a -cssx-scrollbar-width property is
- * found in a rule, cssx will normally load the "scrollbar" plugin
- * and create a rule to supply the correct value. If cssxAuto is
- * false, cssx will ignore -cssx-scrollbar-width unless the plugin was
- * preloaded or specified in a directive.
- *
- * cssxDirectiveLimit: Number, default = 200
- * Set cssxDirectiveLimit to the number of characters into a css file
- * to look for cssx directives before giving up.  Set this to zero
- * if you don't want cssx to scan for directives at all.  Set it to
- * a very high number if you're concatenating css files together!
- * Override this via the !limit loader suffix.
- *
  * Suffixes can be applied to resources when listed as a dependency.
  * e.g. define(['cssx/cssx!myModule!ignore=ieLayout'], callback);
  *
  * Available suffixes:
  * !ignore: a comma-separated list of cssx plugins to ignore
- * TODO: remove: !inspect: a comma-separated list of cssx plugins to run
- * !scanlimit: the number of characters into the css file to search
- * 		for cssx directives
+ *
+ * 	TODO: loading of the imported sheet must be chained!
  *
  */
 
 define(
 	[
-		'require',
-		'./css',
-		'./common',
-		'./CssTextParser',
-		'./sniff',
-		'./shim/_bundles',
-		'./shim/_tests'
+		'./shims',
+		'./CssTextParser'
 	],
-	function (require, css, common, CssTextParser, sniff, bundles, tests) {
-		"use strict";
+	function (shims, CssTextParser) {
 
-		// TODO: rewrite css.js using promises and inherit Promise from there
+		var
+			undef,
+			debugMode,
+			head = document.head || document.getElementsByTagName('head')[0],
+			// this actually tests for absolute urls and root-relative urls
+			// they're both non-relative
+			nonRelUrlRe = /^\/|^[^:]*:\/\//,
+			// Note: this will fail if there are parentheses in the url
+			findUrlRx = /(?:url\()[^\)]*(?:\))/g,
+			stripUrlRx = /url\(\s*["']?|["']?\s*\)/g,
+			activeShims = {};
+
+		function nameWithExt (name, defaultExt) {
+			return name.lastIndexOf('.') <= name.lastIndexOf('/') ?
+				name + '.' + defaultExt : name;
+		}
+
+		function parseSuffixes (name) {
+			// creates a dual-structure: both an array and a hashmap
+			// suffixes[0] is the actual name
+			var parts = name.split('!'),
+				suf, i = 1, pair;
+			while ((suf = parts[i++])) { // double-parens to avoid jslint griping
+				pair = suf.split('=', 2);
+				parts[pair[0]] = pair.length == 2 ? pair[1] : true;
+			}
+			return parts;
+		}
+
 		function Promise () {
 			this._thens = [];
 		}
@@ -86,239 +83,426 @@ define(
 			_complete: function (which, arg) {
 				// switch over to sync then()
 				this.then = which === 'resolve' ?
-					function (resolve, reject) { resolve && resolve(arg); return this; } :
-					function (resolve, reject) { reject && reject(arg); return this; };
+					function (resolved, rejected) { resolved && resolved(arg); return this; } :
+					function (resolved, rejected) { rejected && rejected(arg); return this; };
+				// complete all async then()s
+				var aThen;
+				while (aThen = this._thens.shift()) { aThen[which] && aThen[which](arg); }
+				delete this._thens;
 				// disallow multiple calls to resolve or reject
 				this.resolve = this.reject =
 					function () { throw new Error('Promise already completed.'); };
-				// complete all async then()s
-				var aThen, i = 0;
-				while (aThen = this._thens[i++]) { aThen[which] && aThen[which](arg); }
-				delete this._thens;
 			}
 
 		};
 
-		var
-//			preloading,
-			undef,
-			shims;
+		function CssProcessor (processors) {
+			Promise.call(this);
+			this.input = '';
+			// since this code is mostly for IE, we're using IE-friendly string concatenation:
+			this.output = [];
+			this.processors = processors;
+		}
+		CssProcessor.prototype = new Promise();
 
-//		function checkCssxDirectives (text) {
-//			// check for any cssx markers in the file
-//			// limit this search to the first XXX lines or first XXX chars
-//			var top = text.substr(0, 500),
-//				optMatches = text.match(/\s?\/*\s?cssx:(.*?)(?:$|;|\*\/)/m),
-//				opts = {},
-//				opText, pair;
-//			while (opText = optMatches.unshift()) {
-//				var pairs = optMatches[i].split(/\s?,\s?/), opt;
-//				while (opt = pairs.unshift()) {
-//					pair = opt.split(/\s?\.\s?/);
-//					opts[pair[0]] = pair[1];
-//				}
-//			}
-//			return opts;
-//		}
+		CssProcessor.prototype.getOutput = function () {
+			return this.output.join('');
+		};
+
+		CssProcessor.prototype.onRule = function (selectors) {
+			// onRule processors should output anything that needs to be output
+			// before processing the current rule. They should not output
+			// anything for the current rule.
+			var self = this, result, output, first = true, modified;
+
+			each(this.processors.onRule, function (processor) {
+				result = processor(selectors);
+				if (result) {
+					modified = true;
+					self.output.push(result);
+				}
+			});
+
+			// onSelector processors should process the current selector only.
+			for (var i = 0, len = selectors.length; i < len; i++) {
+				output = selectors[i];
+				each(this.processors.onSelector, function (processor) {
+					result = processor(output);
+					if (typeof result == 'string') {
+						modified = true;
+						output = result;
+					}
+				});
+				if (output) {
+					this.output.push(first ? output : ',' + output);
+					first = false;
+				}
+			}
+
+			if (debugMode && modified) {
+				this.output.push('\n/* ', selectors.join(','), ' */\n');
+			}
+
+			this.output.push('{\n');
+		};
+
+		CssProcessor.prototype.onProperty = function (name, value, selectors) {
+			// process any callbacks for custom property names or catch-all value callbacks
+			var result, orig = value, output = [], modified;
+
+			// fix any urls.
+			var basePath = this.basePath;
+			value = (value || '').replace(findUrlRx, function (url) {
+				modified = true;
+				return translateUrl(url, basePath);
+			});
+
+			// process the value through any onValue processors
+			each(this.processors.onValue, function (processor) {
+				result = processor(name, value, selectors);
+				if (typeof result == 'string' && result != value) {
+					modified = true;
+					value = result;
+				}
+			});
+
+			each(this.processors.onProperty, function (processor) {
+				result = processor(name, value, selectors);
+				if (typeof result == 'string') {
+					modified = true;
+					output.push(result);
+				}
+			});
+
+			each(this.processors[name], function (processor) {
+				result = processor(name, value, selectors);
+				if (typeof result == 'string') {
+					modified = true;
+					output.push(result);
+				}
+			});
+
+			if (debugMode && modified) {
+				this.output.push('\t/* ', name, ':', orig, '; */\n');
+			}
+
+			// create default output if we didn't get any from the shims
+			if (output.length) {
+				this.output.concat(output);
+			}
+			else {
+				this.output.push('\t', name, ':', value, ';\n');
+			}
+
+		};
+
+		CssProcessor.prototype.onEndRule = function (selectors) {
+			// onEndRule processors should output anything that needs to be output
+			// after processing the current rule. They should not output
+			// anything for the current rule.
+			var self = this, result;
+			// onEndRule processors should not output a closing brace!
+			this.output.push('}\n');
+			each(this.processors.onEndRule, function (processor) {
+				result = processor(selectors);
+				if (result) {
+					self.output.push(result, '\n');
+				}
+			});
+		};
+
+		CssProcessor.prototype.onAtRule = function (keyword, data, hasBlock) {
+			// just reproduce it
+			this.output.push('@', keyword, (data ? ' ' + data : ''), (hasBlock ? '{' : ';'), '\n');
+		};
+
+		CssProcessor.prototype.onImport = function (url, media) {
+			// @import processing
+			var newUrl;
+			if (!media || /\b(screen|all|handheld)\b/i.test(media)) {
+				newUrl = url;// translateUrl(url, this.basePath, true);
+				// TODO: loading of the imported sheet must be chained!
+				this.loadImport(newUrl);
+			}
+		};
+
+		function each (array, callback) {
+			for (var i = 0, len = array && array.length; i < len; i++) {
+				callback(array[i], i, array);
+			}
+
+		}
 
 		function listHasItem (list, item) {
 			return list ? (',' + list + ',').indexOf(',' + item + ',') >= 0 : false;
 		}
 
-//		function chain (func, after) {
-//			return function (processor, args) {
-//				func(processor, args);
-//				after(processor, args);
-//			};
-//		}
-
-		function applyCssx (processor, cssText, plugins) {
-			// attach plugin callbacks
-			var callbacks = {
-					onSheet: undef,
-					onRule: undef,
-					onEndRule: undef,
-					onAtRule: undef,
-					onImport: undef,
-					onSelector: undef,
-					onProperty: undef
-				},
-				count = 0;
+		function applyCssx (processor) {
 			try {
-				for (var p in callbacks) (function (cb, p) {
-					for (var i = 0; i < plugins.length; i++) {
-						if (plugins[i][p]) {
-							cb = function (processor, args) {
-								cb && cb(processor, args);
-								plugins[i][p](processor, args);
-							};
-	//						cb = chain(cb, plugins[i][p]);
-							count++;
-						}
-					}
-					if (cb !== undef) {
-						callbacks[p] = function () { cb(processor, arguments); }
-					}
-				}(callbacks[p], p));
-				if (count > 0) {
-					// TODO: parse file, applying cssx fixes as found
-					new CssTextParser(callbacks).parse(cssText);
-				}
-				processor.resolve(processor.cssText);
+				new CssTextParser(processor, processor).parse(processor.input);
+				processor.resolve(processor.getOutput());
 			}
 			catch (ex) {
 				processor.reject(ex);
 			}
 		}
 
-		function getShims (require, callback) {
-			// get the list of bundles
-//			require(['./shim/_bundles'], function (bundles) {
-				var bundleName;
-				// find the one that first matches our user agent
-				for (var n in bundles) {
-					if (n !== 'default') {
-						var ctx = {}, env = { isBuild: false }; // TODO: build-time
-						if (bundles[n].test === true || bundles[n].test(env, sniff, ctx)) {
-							bundleName = bundles[n].name;
-							break;
+		// go get shims
+		var shimCallback = new Promise();
+		shims(function (allShims) {
+
+			// collect shim handlers
+			for (var i in allShims) {
+				for (var p in allShims[i]) {
+					if (!(p in {})) {
+						if (!activeShims[p]) {
+							activeShims[p] = [];
 						}
+						activeShims[p].push(allShims[i][p]);
 					}
 				}
-				// fetch it and return the bundle of shims
-				require([bundleName || bundles['default'].name], function (bundle) {
-					callback(bundle);
-				});
-//			});
-		}
-
-		function runFeatureTests (require, shims, callback) {
-			// get all of the feature tests
-//			require(['./shim/_tests'], function (tests) {
-				// collect any that fail
-				var failed = [];
-				for (var n in tests) {
-					var ctx = {}, env = { isBuild: false }; // TODO: build-time
-					// only test for the shims that we don't already have
-					if (!(n in shims) && !tests[n].test(env, sniff, ctx)) {
-						failed.push(tests[n].name);
-					}
-				}
-				// get the shims for those
-				require(failed, function () {
-					for (var i = 0; i < failed.length; i++) {
-						shims[failed[i]] = arguments[i];
-					}
-					callback(shims);
-				});
-//			});
-		}
-
-		function getAllShims (require, callback) {
-			getShims(require, function (bundle) {
-				runFeatureTests(require, bundle, callback);
-			});
-		}
-
-		getAllShims(require, function (allShims) {
-			shims = allShims;
-		});
-
-		return common.beget(css, {
-
-			version: '0.1',
-
-			load: function (name, require, callback, config) {
-
-				// create a promise
-				var processor = new Promise();
-
-				// add some useful stuff to it
-				processor.cssText = '';
-				processor.appendRule = function (objOrArray) {
-					var rules = [].concat(objOrArray),
-						rule, i = 0;
-					while (rule = rules[i++]) {
-						this.cssText += rule;
-					}
-				};
-
-				// tell promise to write out style element when it's resolved
-				processor.then(function (cssText) {
-					// TODO: finish this
-					if (cssText) createStyleNode(cssText, cssDef.link);
-				});
-
-				// tell promise to call back to the loader
-				processor.then(
-					callback.resolve ? callback.resolve : callback,
-					callback.reject ? callback.reject : undef
-				);
-
-//				// check for preloads
-//				if (preloading === undef) {
-//					preloading = true;
-//					var preloads = [];
-//					for (var p in activations) {
-//						if (activations.hasOwnProperty(p)) {
-//							// TODO: supply the environment parameter
-//							if (activations.load({ isBuild: false }, sniff)) {
-//								preloads.push('./plugin/' + p);
-//							}
-//						}
-//					}
-//					require(preloads, function () { preloading = false; process(); });
-//				}
-//				else {
-//					preloading = false;
-//				}
-
-				// check for special instructions (via suffixes) on the name 
-				var opts = css.parseSuffixes(name),
-					dontExecCssx = config.cssxDirectiveLimit <= 0 && listHasItem(opts.ignore, 'all'),
-					cssDef = {};
-
-				function process () {
-//					if (!preloading) {
-						if (cssDef.link) {
-							if (dontExecCssx) {
-								callback(cssDef);
-							}
-							else if (cssDef.cssText != undef /* truthy if null or undefined, but not "" */) {
-								// TODO: get directives in file to see what rules to skip/exclude
-								//var directives = checkCssxDirectives(cssDef.cssText);
-								// TODO: get list of excludes from suffixes
-
-
-//								var directives = [];
-//								require(directives, function () {
-									applyCssx(processor, cssDef, cssText, Array.prototype.slice.call(arguments, 0));
-//								});
-							}
-						}
-//					}
-				}
-
-				function gotLink (link) {
-					cssDef.link = link;
-					process();
-				}
-
-				function gotText (text) {
-					cssDef.cssText = text;
-					process();
-				}
-
-				// get css file (link) via the css plugin
-				css.load(name, require, gotLink, config);
-				if (!dontExecCssx) {
-					// get the text of the file, too
-					require(['text!' + name], gotText);
-				}
-
 			}
 
+			shimCallback.resolve();
+
 		});
+
+		function has (feature) {
+			return hasFeatures[feature];
+		}
+
+		function translateUrl (url, parentPath, bare) {
+			var path = url.replace(stripUrlRx, '');
+			// if this is a relative url
+			if (!nonRelUrlRe.test(path)) {
+				// append path onto it
+				path = parentPath + path;
+			}
+			return bare ? path : 'url("' + path + '")';
+		}
+
+		var currentSheet, currentSheetId = 0;
+		function getStylesheet (name, parentSheet) {
+			if (has('dom-create-stylesheet')) {
+				// this is a lame attempt to avoid 4000-rule limit of IE
+				if (!currentSheet || currentSheet.rules.length > 3000) {
+					currentSheet = document.createStyleSheet();
+					// since we're combining files, name is not imprecise,
+					// so we generate an id
+					currentSheet.id = currentSheetId++;
+				}
+				return currentSheet;
+			}
+			else {
+				// we can use standard <style> element creation
+				var node = document.createElement("style");
+				node.setAttribute("type", "text/css");
+				if (parentSheet) {
+					head.insertBefore(node, parentSheet);
+				}
+				else {
+					head.appendChild(node);
+				}
+				node.setAttribute('id', name);
+				return node;
+			}
+		}
+
+		var cssxSheets = [];
+		function insertCss (sheet, css) {
+			if (has('stylesheet-cssText')) {
+				// IE mangles cssText if you try to read it out, so we have
+				// to save a copy of the originals in cssxSheets;
+				var id = sheet.id;
+				var sheets = cssxSheets[id] = cssxSheets[id] || [];
+				sheets.push(css);
+				sheet.cssText = sheets.join('\n\n/************/\n\n');
+			}
+			else {
+				sheet.appendChild(document.createTextNode(css));
+			}
+		}
+
+		var hasFeatures = {
+			'dom-create-stylesheet': !!document.createStyleSheet,
+			'stylesheet-cssText': document.createStyleSheet &&
+				(currentSheet = document.createStyleSheet()) &&
+				('cssText' in currentSheet)
+		};
+
+
+
+		/***** xhr *****/
+
+		var progIds = ['Msxml2.XMLHTTP', 'Microsoft.XMLHTTP', 'Msxml2.XMLHTTP.4.0'];
+
+		function xhr () {
+			if (typeof XMLHttpRequest !== "undefined") {
+				// rewrite the getXhr method to always return the native implementation
+				xhr = function () { return new XMLHttpRequest(); };
+			}
+			else {
+				// keep trying progIds until we find the correct one, then rewrite the getXhr method
+				// to always return that one.
+				var noXhr = xhr = function () {
+						throw new Error("XMLHttpRequest not available");
+					};
+				while (progIds.length > 0 && xhr == noXhr) (function (id) {
+					try {
+						new ActiveXObject(id);
+						xhr = function () { return new ActiveXObject(id); };
+					}
+					catch (ex) {}
+				}(progIds.shift()));
+			}
+			return xhr();
+		}
+
+		function fetchText (url, callback, errback) {
+			var x = xhr();
+			x.open('GET', url, true);
+			if (x.overrideMimeType) {
+				x.overrideMimeType('text/plain');
+			}
+			x.onreadystatechange = function (e) {
+				if (x.readyState === 4) {
+					if (x.status < 400) {
+						callback(x.responseText);
+					}
+					else {
+						errback(new Error('fetchText() failed. status: ' + x.statusText));
+					}
+				}
+			};
+			x.send(null);
+		}
+
+		function isXDomain (url, doc) {
+			// using rules at https://developer.mozilla.org/En/Same_origin_policy_for_JavaScript
+			// Note: file:/// urls are not handled by this function!
+			// See also: http://en.wikipedia.org/wiki/Same_origin_policy
+			if (!/:\/\/|^\/\//.test(url)) {
+				// relative urls are always same domain, duh
+				return false;
+			}
+			else {
+				// same domain means same protocol, same host, same port
+				// exception: document.domain can override host (see link above)
+				var loc = doc.location,
+					parts = url.match(/([^:]+:)\/\/([^:\/]+)(?::([^\/]+)\/)?/);
+				return (
+					loc.protocol !== parts[1] ||
+					(doc.domain !== parts[2] && loc.host !== parts[2]) ||
+					loc.port !== (parts[3] || '')
+				);
+			}
+		}
+
+
+		function load (name, require, callback, config, parentSheet) {
+
+			function fail (ex) {
+				if (callback.reject) callback.reject(ex); else throw ex;
+			}
+
+			function resolve (val) {
+				callback.resolve ? callback.resolve() : callback();
+			}
+
+			debugMode = config['cssxDebug'];
+
+			shimCallback.then(
+				function () {
+
+					// create a promise
+					var processor = new CssProcessor(activeShims),
+						stylesheet = getStylesheet(name, parentSheet),
+						relPath = name.substr(0, name.lastIndexOf('/') + 1);
+
+					// add some useful stuff to it
+					processor.input = '';
+					processor.basePath = require['toUrl'](relPath);
+					processor.loadImport = function (imported) {
+						// TODO: move imported stylesheet before parent
+						// TODO: somehow move @imported rules before current rules in IE
+						var promise = new Promise(),
+							url = relPath + imported;
+						load(url, require, promise, config, stylesheet);
+					};
+
+					// TODO:
+					// 1. create a load method for @imports to use
+
+
+
+					// tell promise to write out style element when it's resolved
+					processor.then(function (cssText) {
+						if (cssText) insertCss(stylesheet, cssText);
+					});
+
+					// tell promise to call back to the loader
+					processor.then(resolve, fail);
+
+					// check for special instructions (via suffixes) on the name
+					var opts = parseSuffixes(name),
+						dontExecCssx = config.cssxDirectiveLimit <= 0 && listHasItem(opts.ignore, 'all');
+
+					function process () {
+						if (dontExecCssx) {
+							processor.resolve(processor.input);
+						}
+						else if (processor.input != undef /* truthy if null or undefined, but not "" */) {
+							// TODO: get directives in file to see what rules to skip/exclude
+							//var directives = checkCssxDirectives(processor.input);
+							// TODO: get list of excludes from suffixes
+							applyCssx(processor);
+						}
+					}
+
+					function gotLink (link) {
+						processor.link = link;
+						processor.resolve();
+					}
+
+					function gotText (text) {
+						processor.input = text;
+						process();
+					}
+
+					var url = require['toUrl'](nameWithExt(name, 'css'));
+
+					if (isXDomain(url, document)) {
+						// we can't do x-domain!
+						fail(new Error('Can\'t process x-domain stylesheet: ' + url));
+					}
+					else {
+						// get the text of the file
+						// TODO: pass a promise, not just a callback
+						fetchText(url, gotText, fail);
+					}
+
+					// TODO: return something useful to the user like a stylesheet abstraction
+					// not the processor
+					return processor;
+
+				},
+				fail
+			);
+
+		}
+
+		/***** the plugin *****/
+		
+		return {
+
+			version: '0.2',
+
+			load: function (name, require, callback, config) {
+				return load(name, require, callback, config);
+			}
+
+		};
 
 	}
 );
+

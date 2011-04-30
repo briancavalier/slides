@@ -6,9 +6,15 @@
     LICENSE: see the LICENSE.txt file. If file is missing, this file is subject to the AFL 3.0
     license at the following url: http://www.opensource.org/licenses/afl-3.0.php.
 */
-define(['./common'], function (common) {
+define(function () {
 
-	var every = common.every;
+	function every (a, cb) {
+		var e = true, i, len = a.length;
+		for (i = 0; i < len && e; i++) {
+			e = cb(a[i], i, a);
+		}
+		return e;
+	}
 
 	return function (/* Object */ cb) {
 		//  summary: A fast, flexible CSS event-based DOM parser in 1kB! (minified)
