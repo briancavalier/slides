@@ -47,14 +47,14 @@
 	     the css dir.  Note that these are relative to the location of require.js -->
 	<script type="text/javascript">
 		(function(global) {
-			global.require = {
+			global.curl = {
 				baseUrl: "js",
 				paths: {
 					"slides": "../slides",
-					"css": "../css",
-					"wire": "./wire",
-					"domReady": "curl/domReady"
-				}
+					"themes": "../css/themes",
+					"wire": "./wire"
+				},
+				pluginPath: 'curl/plugin'
 			};
 
 			global.wire = {
@@ -66,7 +66,7 @@
 	</script>
 	<script type="text/javascript" src="js/curl.js"></script>
 	<script type="text/javascript">
-		require(['wire!slides-spec']);
+		curl(['wire!slides-spec']);
 	</script>
 </head>
 

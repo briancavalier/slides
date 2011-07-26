@@ -1,17 +1,28 @@
 /**
- * @license Copyright (c) 2010 Brian Cavalier
+ * @license Copyright (c) 2010-2011 Brian Cavalier
  * LICENSE: see the LICENSE.txt file. If file is missing, this file is subject
  * to the MIT License at: http://www.opensource.org/licenses/mit-license.php.
  */
 
 /*
-	File: debug.js
+	Package: debug.js
 	wire plugin that logs timing and debug information about wiring context and object
 	lifecycle events (e.g. creation, properties set, initialized, etc.).
 */
 define([], function() {
 	var timer = createTimer();
 
+	/*
+		Function: time
+		Builds a string with timing info and a message for debug output
+
+		Params:
+			text - String message
+			contextTimer - per-context timer information
+		
+		Returns:
+		A formatted string for output
+	*/
 	function time(text, contextTimer) {
 		var all = timer(),
 			timing = "(total: " + 
@@ -45,9 +56,11 @@ define([], function() {
 			toString() function that is useful in logging the time.
 		*/
 		return function getTime() {
-			var now = new Date().getTime(),
-				total = now - start,
-				splitTime = now - split;
+			var now, total, splitTime;
+
+			now = new Date().getTime();
+			total = now - start;
+			splitTime = now - split;
 			split = now;
 
 			return {
@@ -59,38 +72,10 @@ define([], function() {
 			};
 		};
 	}
-	
-	/*
-		Function: logProgress
-		Logs progress info to the console
-		
-		Parameters:
-			progress - progress Object with status, target, and spec
-				- target - Object - object whose status is being reported
-				- status - String - current status of object
-				- spec: Any - wiring spec
-	*/
-	function logProgress(update, contextTimer) {
-		update.created.then(function(target) {
-			console.log(time('Object created', contextTimer), target, update.spec);
-		});
-
-		update.configured.then(function(target) {
-			console.log(time('Object configured', contextTimer), target, update.spec);		
-		});
-		
-		update.initialized.then(function(target) {
-			console.log(time('Object initialized', contextTimer), target, update.spec);		
-		});
-
-		update.destroyed.then(function(target) {
-			console.log(time('Object destroyed', contextTimer), target, update.spec);		
-		});
-	}
 
 	return {
 		/*
-			Function: wire$wire
+			Function: wire$plugin
 			Invoked when wiring starts and provides two promises: one for wiring the context,
 			and one for destroying the context.  Plugins should register resolve, reject, and
 			promise handlers as necessary to do their work.
@@ -103,17 +88,13 @@ define([], function() {
 					rejected if there is an error while destroying the context, and will
 					receive progress events for objects being destroyed.
 		*/
-		wire$plugin: function debugPlugin(ready, destroyed, options) {
+		wire$plugin: function debugPlugin(ready, destroyed /*, options */) {
 			var contextTimer = createTimer();
 			
 			function contextTime(msg) {
 				return time(msg, contextTimer);
 			}
-			
-			function logContextProgress(progress) {
-				logProgress(progress, contextTimer);
-			}
-			
+
 			console.log(contextTime("Context init"));
 			
 			ready.then(
@@ -122,8 +103,8 @@ define([], function() {
 				},
 				function onContextError(err) {
 					console.error(contextTime("Context ERROR: "), err);
-				},
-				logContextProgress
+					console.error(err);
+				}
 			);
 			
 			destroyed.then(
@@ -135,7 +116,25 @@ define([], function() {
 				}
 			);
 
-			// return {};		
+			function makeListener(step) {
+				return function(promise, proxy /*, wire */) {
+					var message = time('Object ' + step, contextTimer);
+					if(proxy.target) {
+						console.log(message, proxy.target, proxy.spec);
+					} else {
+						console.log(message, proxy);
+					}
+					promise.resolve();
+				}
+			}
+
+			return {
+				create:     makeListener('created'),
+				configure:  makeListener('configured'),
+				initialize: makeListener('initialized'),
+				ready:      makeListener('ready'),
+				destroy:    makeListener('destroyed')
+			};
 		}
 	};
 

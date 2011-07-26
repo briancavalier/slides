@@ -1,5 +1,5 @@
 /**
- * @license Copyright (c) 2010 Brian Cavalier
+ * @license Copyright (c) 2010-2011 Brian Cavalier
  * LICENSE: see the LICENSE.txt file. If file is missing, this file is subject
  * to the MIT License at: http://www.opensource.org/licenses/mit-license.php.
  */
@@ -12,27 +12,54 @@
 	event handlers.
 */
 define(['dojo', 'dojo/_base/event'], function(events) {
-	
+
 	return {
 		wire$plugin: function eventsPlugin(ready, destroyed, options) {
 			
 			var connectHandles = [];
 
+			function connect(target, ref, options, wire) {
+				var eventName;
+				// If ref is a method on target, connect it to another object's method, i.e. calling a method on target
+				// causes a method on the other object to be called.
+				// If ref is a reference to another object, connect that object's method to a method on target, i.e.
+				// calling a method on the other object causes a method on target to be called.
+				if(typeof target[ref] == 'function') {
+					eventName = ref;
+					for(ref in options) {
+						wire.resolveRef(ref).then(function(resolved) {
+							connectHandles.push(events.connect(target, eventName, resolved, options[ref]));
+						});
+					}
+				} else {
+					wire.resolveRef(ref).then(function(resolved) {
+						for(eventName in options) {
+							connectHandles.push(events.connect(resolved, eventName, target, options[eventName]));
+						}
+					});							
+				}
+
+			}
+			
 			/*
-				Function: connect
+				Function: connectFacet
 				Setup connections for each specified in the connects param.  Each key
 				in connects is a reference, and the corresponding value is an object
 				whose keys are event names, and whose values are methods of object to
 				invoke.  For example:
 				connect: {
+					"refToOtherThing": {
+						"eventOrMethodOfOtherThing": "myOwnMethod"
+					},
 					"dom!myButton": {
 						"onclick": "_handleButtonClick"
 					},
 					"dijit!myWidget": {
 						"onChange": "_handleValueChange"
-					},
-					"otherObject": {
-						"onWhatever": "_handleWhatever"
+					}
+
+					"myOwnEventOrMethod": {
+						"refToOtherThing": "methodOfOtherThing"
 					}
 				}
 
@@ -41,15 +68,9 @@ define(['dojo', 'dojo/_base/event'], function(events) {
 					object - object being wired, will be the target of connected events
 					connects - specification of events to connect, see examples above.
 			*/
-			function connect(wire, target, connects) {
+			function connectFacet(wire, target, connects) {
 				for(var ref in connects) {
-					(function(ref, c) {
-						wire.resolveRef(ref).then(function(resolved) {
-							for(var eventName in c) {
-								connectHandles.push(events.connect(resolved, eventName, target, c[eventName]));
-							}
-						});
-					})(ref, connects[ref]);
+					connect(target, ref, connects[ref], wire);
 				}
 			}
 			
@@ -60,10 +81,10 @@ define(['dojo', 'dojo/_base/event'], function(events) {
 			});
 
 			return {
-				aspects: {
+				facets: {
 					connect: {
-						initialized: function(promise, aspect, wire) {
-							connect(wire, aspect.target, aspect.options);
+						ready: function(promise, facet, wire) {
+							connectFacet(wire, facet.target, facet.options);
 							promise.resolve();
 						}
 					}

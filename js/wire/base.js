@@ -1,162 +1,223 @@
 /**
- * @license Copyright (c) 2010 Brian Cavalier
+ * @license Copyright (c) 2010-2011 Brian Cavalier
  * LICENSE: see the LICENSE.txt file. If file is missing, this file is subject
  * to the MIT License at: http://www.opensource.org/licenses/mit-license.php.
  */
 
 /*
 	File: base.js
-	Base wire plugin that provides a reference resolver to resolve objects by name,
-	and a setter plugin that sets basic Javascript properties, e.g. object.prop = value.
+	Base wire plugin that provides properties, init, and destroy facets, and a
+	proxy for plain JS objects.
 */
 define([], function() {
-	var tos, destroyFuncs, undef;
-
+	var tos, beget;
 	tos = Object.prototype.toString;
-	destroyFuncs = [];
 
-	function isArray(it) {
-		return tos.call(it) == '[object Array]';
+	// In case Object.create isn't available
+	function T() {}
+
+	function objectCreate(prototype) {
+		T.prototype = prototype;
+		return new T();
+	}
+
+	beget = Object.create || objectCreate;
+	
+	function reject(resolver) {
+		return function(err) {
+			resolver.reject(err);
+		};
+	}
+	
+	function resolve(resolver) {
+		return function(result) {
+			resolver.resolve(result);
+		};
 	}
 
 	function invoke(promise, func, target, args, wire) {
-		var f = target[func];
+		var f, rejecter;
+
+		f= target[func];
+
+		rejecter = reject(promise);
+
 		if(typeof f == 'function') {
 			if(args) {
-				wire(args).then(function(resolvedArgs) {
-					try {
-						var result = f.apply(target, (tos.call(resolvedArgs) == '[object Array]')
-							? resolvedArgs
-							: [resolvedArgs]);
-						promise.resolve(result);
+				wire(args).then(
+					function(resolvedArgs) {
+						try {
+							var result = f.apply(target, (tos.call(resolvedArgs) == '[object Array]')
+								? resolvedArgs
+								: [resolvedArgs]);
 
-					} catch(e) {
-						promise.reject(e);
-
-					}
-				});
+							promise.resolve(result);
+						} catch(e) {
+							rejecter(e);
+						}
+					},
+					rejecter
+				);
 			}			
 		}
 	}
 
-	function invokeAll(promise, aspect, wire) {
+	function invokeAll(promise, facet, wire) {
 		var target, options;
 
-		target  = aspect.target;
-		options = aspect.options;
+		target  = facet.target;
+		options = facet.options;
 
 		if(typeof options == 'string') {
 			invoke(promise, options, target, [], wire);
 
 		} else {
-			var promises, p;
+			var promises, p, func;
 			promises = [];
 
-			for(var func in options) {
+			for(func in options) {
 				p = wire.deferred();
 				promises.push(p);
 				invoke(p, func, target, options[func], wire);
 			}
 			
-			wire.whenAll(promises).then(function() {
-				promise.resolve();
-			});
+			wire.whenAll(promises).then(
+				resolve(promise),
+				reject(promise)
+			);
 		}
 	}
 
-	function literalFactory(promise, spec, wire) {
-		promise.resolve(spec.wire$literal);
+	// Factory that handles cases where you need to create an object literal
+	// that has a property whose name would trigger another wire factory.
+	// For example, if you need an object literal with a property named "create",
+	// which would normally cause wire to try to construct an instance using
+	// a constructor or other function, and will probably result in an error,
+	// or an unexpected result:
+	// myObject: {
+	//	 create: "foo"
+	//   ...
+	// }
+	//
+	// You can use the literal factory to force creation of an object literal:
+	// myObject: {
+	//   literal: {
+	//     create: "foo"
+	//   }
+	// }
+	//
+	// which will result in myObject.create == "foo" rather than attempting
+	// to create an instance of an AMD module whose id is "foo".
+	function literalFactory(promise, spec /*, wire */) {
+		promise.resolve(spec.literal);
 	}
 
-	function propertiesAspect(promise, aspect, wire) {
-		var options, promises, p, val;
+	function protoFactory(promise, spec, wire) {
+		var parentRef = spec.prototype;
 
+		wire.resolveRef(parentRef).then(
+			function(parent) {
+				var child = beget(parent);
+				promise.resolve(child);
+			},
+			reject(promise)
+		);
+	}
+
+	function propertiesFacet(promise, facet, wire) {
+		var options, promises, prop;
 		promises = [];
-		options = aspect.options;
+		options = facet.options;
 
-		for(var prop in options) {
-
-			p = wire.deferred();
-			promises.push(p);
-
-			(function(p, name, val) {
-				
-				wire(val).then(function(resolvedValue) {
-					aspect.set(name, resolvedValue);
-					p.resolve();
-				});
-
-			})(p, prop, options[prop]);
+		for(prop in options) {
+			promises.push(setProperty(facet, prop, options[prop], wire));
 		}
 
-		wire.whenAll(promises).then(function() {
-			promise.resolve();
-		});
+		wire.whenAll(promises).then(
+			resolve(promise),
+			reject(promise)	
+		);
 	}
 
-	function initAspect(promise, aspect, wire) {
-		invokeAll(promise, aspect, wire);
+	function setProperty(proxy, name, val, wire) {
+		var promise = wire(val);
+
+		promise.then(function(resolvedValue) {
+			proxy.set(name, resolvedValue);
+		});
+
+		return promise;
 	}
 
-	function destroyAspect(promise, aspect, wire) {
-		promise.resolve();
 
-		destroyFuncs.push(function destroyObject() {
-			invokeAll(wire.deferred(), aspect, wire);
-		});
+	function initFacet(promise, facet, wire) {
+		invokeAll(promise, facet, wire);
+	}
+
+	function pojoProxy(object /*, spec */) {
+		return {
+			get: function(property) {
+				return object[property];
+			},
+			set: function(property, value) {
+				object[property] = value;
+				return value;
+			},
+			invoke: function(method, args) {
+				return method.apply(object, args);
+			}
+		};
 	}
 
 	return {
-		wire$plugin: function(ready, destroyed, options) {
+		wire$plugin: function(ready, destroyed /*, options */) {
+			var destroyFuncs = [];
+
+			destroyed.then(function() {
+				for(var i = 0, destroy; (destroy = destroyFuncs[i++]);) {
+					destroy();
+				}
+				destroyFuncs = [];
+			});
+
+			function destroyFacet(promise, facet, wire) {
+				promise.resolve();
+				
+				var target, options, w;
+				
+				target = facet.target;
+				options = facet.options;
+				w = wire;
+
+				destroyFuncs.push(function destroyObject() {
+					invokeAll(wire.deferred(), { options: options, target: target }, w);
+				});
+			}
+			
 			return {
-				resolvers: {
-					wire: function(promise, name, refObj, wire) {
-						wire.ready.then(function(context) {
-							promise.resolve(context);
-						});
-					}
-				},
 				factories: {
-					wire$literal: literalFactory
+					literal: literalFactory,
+					prototype: protoFactory
 				},
-				aspects: {
-					// properties aspect.  Sets properties on components
+				facets: {
+					// properties facet.  Sets properties on components
 					// after creation.
 					properties: {
-						created: propertiesAspect
+						configure: propertiesFacet
 					},
-					// init aspect.  Invokes methods on components after
+					// init facet.  Invokes methods on components after
 					// they have been configured
 					init: {
-						configured: initAspect
+						initialize: initFacet
 					},
-					// destroy aspect.  Registers methods to be invoked
+					// destroy facet.  Registers methods to be invoked
 					// on components when the enclosing context is destroyed
 					destroy: {
-						initialized: destroyAspect
+						ready: destroyFacet
 					}
 				},
-				setters: [
-					/*
-						Function: set
-						Basic setter that sets simple Javascript properties.  This is the
-						fallback setter that is used if no other setters can handle setting
-						properties for a particular object.
-						
-						Parameters:
-							object - Object on which to set property
-							property - String name of property to set on object
-							value - value to which to set property
-							
-						Returns:
-						Always returns true.  In general, though, setters should return true if they
-						have successfully set the property, or false (strict false, not falsey)
-						if they cannot set the property on the object.
-					*/
-					function set(object, property, value) {
-						object[property] = value;
-						return true;
-					}
+				proxies: [
+					pojoProxy
 				]
 			};				
 		}

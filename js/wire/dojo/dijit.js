@@ -1,17 +1,11 @@
-/*
-	File: dijit.js
-	wire dijit plugin that provides a dijit! resolver, setter, and
-	manages the lifecycle of dijits created using wire ("programmatic"
-	dijits, not dojoType/data-dojo-type dijits).
-*/
 /**
- * @license Copyright (c) 2010 Brian Cavalier
+ * @license Copyright (c) 2010-2011 Brian Cavalier
  * LICENSE: see the LICENSE.txt file. If file is missing, this file is subject
  * to the MIT License at: http://www.opensource.org/licenses/mit-license.php.
  */
 
 /*
-	File: dijit.js
+	Package: dijit.js
 	wire plugin that provides a reference resolver for dijits declared using
 	dojoType/data-dojo-type, a setter that can set dojo 1.6+ set(name, value)
 	style properties, a wire$init() function that invokes the dojo parser,
@@ -25,7 +19,7 @@ define(['dojo', 'dojo/parser', 'dijit', 'dijit/_Widget'], function(dojo, parser,
 		Function: dijitById
 		Resolver for dijits by id.		
 	*/
-	function dijitById(promise, name, refObj, wire) {
+	function dijitById(promise, name /*, refObj, wire */) {
 		dojo.ready(
 			function() {
 				var resolved = dijit.byId(name);
@@ -33,20 +27,51 @@ define(['dojo', 'dojo/parser', 'dijit', 'dijit/_Widget'], function(dojo, parser,
 				if(resolved) {
 					promise.resolve(resolved);
 				} else {
-					throw new Error("Unresolved dijit ref",name, refObj);
-					// promise.reject();
+					throw new Error("No dijit with id: " + name);
 				}
 			}
 		);
 	}
 
-	function setDijitProperty(object, property, value) {
-		if(typeof object.set == 'function') {
-			object.set(property, value);
-			return true;
+	function isDijit(it) {
+		// NOTE: It is possible to create inheritance hierarchies with dojo.declare
+		// where the following evaluates to false *even though* dijit._Widget is
+		// most certainly an ancestor of it.
+		// So, may need to modify this test if that seems to happen in practice.
+		return it instanceof Widget;
+	}
+
+	function createDijitProxy(object /*, spec */) {
+		var proxy;
+
+		if(isDijit(object)) {
+			proxy = {
+				get: function(property) {
+					return object.get(property);
+				},
+				set: function(property, value) {
+					return object.set(property, value);
+				},
+				invoke: function(method, args) {
+					return method.invoke(object, args);
+				}
+			};
 		}
 
-		return false;
+		return proxy;
+	}
+
+	function destroyDijit(target) {
+		// It's a dijit, so we need to know when it is being
+		// destroyed so that we can do proper dijit cleanup on it
+		// Prefer destroyRecursive over destroy
+		if (typeof target.destroyRecursive == 'function') {
+			target.destroyRecursive(false);
+
+		} else if (typeof target.destroy == 'function') {
+			target.destroy(false);
+
+		}
 	}
 	
 	return {
@@ -58,34 +83,22 @@ define(['dojo', 'dojo/parser', 'dijit', 'dijit/_Widget'], function(dojo, parser,
 				dojo.ready(function() { parser.parse(); });
 			}
 
-			ready.then(null, null, function(update) {
-				// Only care about objects that are dijits
-				if(update.target instanceof Widget) {
-
-					// It's a dijit, so we need to know when it is being
-					// destroyed so that we can do proper dijit cleanup on it
-					update.destroyed.then(function(target) {
-						// Prefer destroyRecursive over destroy
-						if(typeof target.destroyRecursive == 'function') {
-							target.destroyRecursive(false);
-
-						} else if(typeof target.destroy == 'function') {
-							target.destroy(false);
-
-						}
-					});					
-				}
-			});
-
 			// Return plugin
 			return {
 				resolvers: {
 					dijit: dijitById
 				},
-				setters: [
-					setDijitProperty
-				]
-			}
+				proxies: [
+					createDijitProxy
+				],
+				destroy: function(promise, target /*, wire */) {
+					// Only care about objects that are dijits
+					if (isDijit(target)) {
+						destroyDijit(target);
+					}
+					promise.resolve();
+				}
+			};
 		}
 	};
 });

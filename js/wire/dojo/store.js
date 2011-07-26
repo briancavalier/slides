@@ -1,14 +1,15 @@
 /**
- * @license Copyright (c) 2010 Brian Cavalier
+ * @license Copyright (c) 2010-2011 Brian Cavalier
  * LICENSE: see the LICENSE.txt file. If file is missing, this file is subject
  * to the MIT License at: http://www.opensource.org/licenses/mit-license.php.
  */
 
 /*
-	File: store.js
+	Package: store.js
 	wire plugin that provides a REST resource reference resolver.  Referencing
 	any REST resource using the format: resource!url/goes/here will create a
-	dojo.store.JsonRest pointing to url/goes/here
+	dojo.store.JsonRest pointing to url/goes/here.  Using the id or query
+	options, you can alternatively resolve references to actual data.
 */
 
 define(['dojo/store/JsonRest'], function(JsonRest) {

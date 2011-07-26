@@ -1,16 +1,15 @@
 /**
- * @license Copyright (c) 2010 Brian Cavalier
+ * @license Copyright (c) 2010-2011 Brian Cavalier
  * LICENSE: see the LICENSE.txt file. If file is missing, this file is subject
  * to the MIT License at: http://www.opensource.org/licenses/mit-license.php.
  */
 
 /*
-	File: events.js
+	Package: pubsub.js
 	wire plugin that sets up subscriptions and topics to be published after
-	functions are invoked.  ,
-	and disconnect them when an object is destroyed.  This implementation uses
-	dojo.publish, dojo.subscribe and dojo.unsubscribe to do the work of connecting and disconnecting
-	event handlers.
+	functions are invoked, and disconnect them when an object is destroyed.
+	This implementation uses dojo.publish, dojo.subscribe and dojo.unsubscribe
+	to do the work of connecting and disconnecting event handlers.
 */
 define(['dojo', 'dojo/_base/connect'], function(pubsub) {
 
@@ -94,16 +93,16 @@ define(['dojo', 'dojo/_base/connect'], function(pubsub) {
 			});
 
 			return {
-				aspects: {
+				facets: {
 					publish: {
-						initialized: function(promise, aspect, wire) {
-							proxyPublish(aspect.target, aspect.options);
+						ready: function(promise, facet, wire) {
+							proxyPublish(facet.target, facet.options);
 							promise.resolve();
 						}
 					},
 					subscribe: {
-						initialized: function(promise, aspect, wire) {
-							subscribeTarget(aspect.target, aspect.options);
+						ready: function(promise, facet, wire) {
+							subscribeTarget(facet.target, facet.options);
 							promise.resolve();
 						}
 					}
