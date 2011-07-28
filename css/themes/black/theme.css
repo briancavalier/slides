@@ -6,39 +6,59 @@
 
 @import "../basic.css";
 
-.slide-container {
+html {
+	background: #000;
+	background-image: -webkit-gradient(radial, 50% 50%, 0, 50% 50%, 1000, from(#222), to(#000));
+	background-image: -moz-radial-gradient(center 45deg, circle closest-side, #222 0, #000 1000px);
+}
+
+footer p {
+	color: #666;
+}
+
+#slide-container {
 	margin-top: 4em;
+	background: none;
 }
 
 .slide {
 	font-size: 250%;
-	background: #000;
 	color: #eee;
 }
 
 .slide h1 {
-	font-size: 4em;
+	font-size: 3.2em;
 	font-weight: bold;
-	color: #333;
+	color: #666;
 	margin-bottom: 0;
 	letter-spacing: -.08em;
 	text-rendering: optimizeLegibility;
 }
 
+.slide h1 em {
+	color: #ccc;
+	font-style: normal;
+}
+
+.slide h1.logo {
+	background: url(../../../im/hovercraft-logotype-800.png) no-repeat 50% 50%;
+	text-indent: -9999px;
+}
+
 .slide h2 {
-	color: #999;
+	color: #ccc;
 	margin-top: 0;
 	margin-left: .5em;
 }
 
 .slide p {
-	color: #aaa;
+	color: #eee;
 	margin-left: 2em;
 }
 
 .slide em {
-	font-style: normal;
-	color: #888;
+	font-style: italic;
+	color: #fff;
 }
 
 .slide ul > ul {
@@ -52,6 +72,26 @@
 
 .slide .slide-layout-title {
 	padding-top: 2em;
+}
+
+.slide-layout-long-title h1 {
+	font-size: 2.5em;
+	letter-spacing: -.04em;
+}
+
+.slide-layout-huge h1 {
+	color: #ccc;
+	font-size: 6em;
+	letter-spacing: -.04em;
+	text-align: center;
+}
+
+.slide-layout-tiny h1 {
+	color: #ccc;
+	font-size: 1em;
+	font-weight: normal;
+	text-align: center;
+	margin-top: 3em;
 }
 
 @media screen and (max-device-width: 480px) {
