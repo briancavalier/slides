@@ -10,9 +10,9 @@ You can read more about it in [this presentation, made with the framework.](http
 
 1. Download it
 	- You may want to open index.html in your browser to read a bit more about the framework.
-1. Put numbered HTML slide files in the slides directory
-	- There are example slides there now.  You may want to look at them for format ideas, and then move them aside.
-1. Open index.html in your browser
+1. Put the content for all your slides in slides/slides.html
+	- There are example slides there now, so just follow the format.
+1. Open index.html in your browser!
 
 ### Not-so-quick start
 
