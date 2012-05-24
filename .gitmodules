@@ -1,0 +1,3 @@
+[submodule "js/curl"]
+	path = js/curl
+	url = https://github.com/cujojs/curl
