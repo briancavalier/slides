@@ -43,31 +43,11 @@
 	
 	<!-- <script src="js/modernizr-1.6.min.js" type="text/javascript" charset="utf-8"></script> -->
 
-	<!-- Configure RequireJS to load slides from the slides dir, and css from
-	     the css dir.  Note that these are relative to the location of require.js -->
-	<script type="text/javascript">
-		(function(global) {
-			global.require = {
-				baseUrl: "js",
-				paths: {
-					"slides": "../slides",
-					"css": "../css",
-					"wire": "./wire",
-					"domReady": "curl/domReady"
-				}
-			};
+	<!-- Load curl AMD Loader -->
+	<script src="js/curl/src/curl.js"></script>
 
-			global.wire = {
-				plugins: [{ module: 'wire/dom' }],
-				slideContainer: { $ref: 'dom!slide-container' },
-				slidePath: 'slides/slides.html'
-			};
-		})(window);
-	</script>
-	<script type="text/javascript" src="js/curl.js"></script>
-	<script type="text/javascript">
-		require(['wire!slides-spec']);
-	</script>
+	<!-- Start the app by configuring curl and loading modules -->
+	<script src="js/main.js"></script>
 </head>
 
 <!-- Avoid any FUOC by adding presentation-loading, which the framework
@@ -75,10 +55,6 @@
 <body class="presentation-loading">
 
 	<div>
-		<header>
-
-		</header>
-
 		<!-- The container to hold the slides -->
 		<div id="slide-container">
 
@@ -88,7 +64,7 @@
 		<footer>
 			<p class="slide-no-touch">Use <em>left/right arrows, or space</em> to move between slides</p>
 			<p class="slide-touch"><em>Swipe left or right</em> to move between slides</p>
-			<p>Copyright &copy; 2011 Brian Cavalier</p>
+			<p>Copyright &copy; 2011-2012 Brian Cavalier</p>
 		</footer>
 	</div>
 	

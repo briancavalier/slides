@@ -160,10 +160,24 @@ define([], function() {
 		Returns:
 		a new PresentationController
 	*/
-	return function PresentationController(slideView) {		
+	function PresentationController(slideView) {
+		this._slideView = slideView;
+	};
+
+	PresentationController.prototype.start = function() {
+		// Goto first slide
+		var slideView = this._slideView;
+		if('onhashchange' in window) {
+			window.onhashchange = function(e) {
+				slideView.go(getHash());
+			};
+		}
+
 		window.onkeyup = function(e) {
-			var key = (window.event) ? event.keyCode : e.keyCode,
-				ret = true;
+			var key, ret;
+
+			key = (window.event) ? event.keyCode : e.keyCode;
+			ret = true;
 
 			// Don't handle slide changes when modifiers are down. Only
 			// plain arrow keys change slides.
@@ -187,21 +201,16 @@ define([], function() {
 			return ret;
 		};
 		
-		// Goto first slide
-		slideView.go(getHash()).then(function(result) {
-			success(result);
-			body.className = body.className.replace(/\s*presentation-loading\s*/g, " ");
-		});
-		
-		if('onhashchange' in window) {
-			window.onhashchange = function(e) {
-				slideView.go(getHash());
-			};
-		}
-		
 		if(supportsTouch) {
 			initTouchEvents(slideView);
 		}
-	};
+
+		return slideView.go(getHash()).then(function(result) {
+			success(result);
+		});
+		
+	}
+
+	return PresentationController;
 	
 });
