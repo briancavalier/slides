@@ -7,7 +7,7 @@
 /*
 	Class: PresentationModel
 */
-define(['require', './Promise'], function(require, Promise) {
+define(['require', 'when'], function(require, when) {
 
 	var 
 		// Default number of slides to preload
@@ -65,19 +65,19 @@ define(['require', './Promise'], function(require, Promise) {
 				* content - the slide content
 		*/
 		function getSlide(slide, preloadCount) {
-			var p = new Promise(),
+			var d = when.defer(),
 				slideModule = 'text!' + slidePath + '/' + slide + '.html';
 
 			if(0 <= slide) {
 				if(cachedSlides[slide]) {
-					p.resolve({ slide: slide, content: cachedSlides[slide] });
+					d.resolve({ slide: slide, content: cachedSlides[slide] });
 				} else {
 					require([slideModule], function(slideContent) {
 						if(/404/.test(slideContent)) {
-							p.reject(slide);
+							d.reject(slide);
 						} else {
 							cachedSlides[slide] = slideContent;
-							p.resolve({ slide: slide, content: slideContent });
+							d.resolve({ slide: slide, content: slideContent });
 						}
 					});
 				}
@@ -87,10 +87,10 @@ define(['require', './Promise'], function(require, Promise) {
 				}
 				
 			} else {
-				p.reject(slide);
+				d.reject(slide);
 			}
 			
-			return p.safe();
+			return d.promise;
 		}
 
 		return {

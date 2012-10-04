@@ -7,7 +7,7 @@
 /*
 	Class: PresentationModel
 */
-define(['require', './Promise'], function(require, Promise) {
+define(['require', 'when'], function(require, when) {
 	
 	var defaultSeparator = new RegExp("<hr(\s*\/\s*)?>");
 	
@@ -56,13 +56,13 @@ define(['require', './Promise'], function(require, Promise) {
 					* content - the slide content
 			*/
 			get: function getSlide(slide) {
-				var p = new Promise();
+				var d = when.defer();
 				
 				function resolveSlide() {
 					if(0 <= slide && slide < cachedSlides.length) {
-						p.resolve({ slide: slide, content: cachedSlides[slide] });
+						d.resolve({ slide: slide, content: cachedSlides[slide] });
 					} else {
-						p.reject(slide);
+						d.reject(slide);
 					}
 				}
 				
@@ -72,7 +72,7 @@ define(['require', './Promise'], function(require, Promise) {
 					resolveOnLoad.push(resolveSlide);
 				}
 
-				return p.safe();
+				return d.promise;
 			}
 		};
 		
