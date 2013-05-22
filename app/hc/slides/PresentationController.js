@@ -1,12 +1,12 @@
 /*
- 	@license Copyright (c) 2011 Brian Cavalier
+ 	@license Copyright (c) 2011-2013 Brian Cavalier
 	LICENSE: see the LICENSE.txt file. If file is missing, this file is subject
 	to the MIT License at: http://www.opensource.org/licenses/mit-license.php.
  */
 /*
 	Class: PresentationController
 */
-define([], function() {
+define(function() {
 	
 	var doc = window.document,
 		html = doc.getElementsByTagName('html')[0],

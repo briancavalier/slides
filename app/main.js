@@ -9,7 +9,7 @@ define([
 	function(Model, View, Controller) {
 		var model, view, controller;
 
-		model = new Model('slides/slides.html');
+		model = new Model('text!slides/slides.html');
 		view = new View(document.getElementById('slide-container'), model);
 		controller = new Controller(view);
 

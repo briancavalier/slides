@@ -29,7 +29,7 @@ define(['require', 'when'], function(require, when) {
 			loaded = false,
 			resolveOnLoad = [];
 			
-		require(['text!' + slidePath], function(slideContent) {
+		require([slidePath], function(slideContent) {
 			cachedSlides = slideContent.split(/\s*\<hr\s*\/?\>\s*|\s*----\s*/i);
 			loaded = true;
 			
