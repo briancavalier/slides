@@ -1,8 +1,6 @@
+/* @license Copyright (c) 2011-2013 Brian Cavalier */
 (function(curl) {
 
-	// Configure curl and load components, theme css,
-	// and wait for DOM Ready.  Then create model, view,
-	// and controller, and start the presentation.
 	curl({
 		main: 'app/main',
 		paths: {

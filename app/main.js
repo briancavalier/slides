@@ -1,3 +1,4 @@
+/* @license Copyright (c) 2011-2013 Brian Cavalier */
 define([
 		'app/hc/slides/SingleFilePresentationModel',
 		'app/hc/slides/SlideView',
