@@ -10,7 +10,8 @@
 		packages: {
 			curl: { location: 'components/curl/src/curl' },
 			when: { location: 'components/when', main: 'when' },
-			marked: { location: 'components/marked', main: 'lib/marked' }
+			marked: { location: 'components/marked', main: 'lib/marked' },
+			highlightjs: { location: 'components/highlightjs', main: 'highlight.pack.js' }
 		}
 	});
 

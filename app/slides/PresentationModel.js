@@ -2,7 +2,7 @@
 /*
 	Class: PresentationModel
 */
-define(['require', 'when'], function(require, when) {
+define(['require', '../.'], function(require, when) {
 
 	var 
 		// Default number of slides to preload

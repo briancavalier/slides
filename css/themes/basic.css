@@ -33,6 +33,10 @@ em {
 	color: #888;
 }
 
+pre code {
+    background-color: transparent;
+}
+
 .slide h1, .slide h2, .slide h3, .slide h4, .slide h5 {
 	font-weight: bold;
 	margin: .25em 0;

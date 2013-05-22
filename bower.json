@@ -4,6 +4,7 @@
   "dependencies": {
     "when": "~2",
     "marked": "~0.2",
-    "curl": "~0.7"
+    "curl": "~0.7",
+    "highlightjs": "~7"
   }
 }

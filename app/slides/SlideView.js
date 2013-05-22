@@ -83,6 +83,7 @@ define([], function() {
 			
 			function reject(num) {
 				console.log("No such slide", num);
+				console.error(num);
 			}
 			
 			if(!slides[slide]) {
