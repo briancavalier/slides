@@ -10,10 +10,9 @@ You can read more about it in [this presentation, made with the framework.](http
 ### Quick start
 
 1. Make sure you have [node and npm](http://nodejs.org)
-1. Make sure you have [bower](http://bower.io)
 1. Download/fork/clone this repo
 1. `cd <slides dir>`
-1. `bower install`
+1. `npm install`
 1. You may want to open index.html in your browser to read a bit more about the framework.
 1. Put the content for all your slides in slides/slides.html
 	- There are example slides there now, so just follow the format.

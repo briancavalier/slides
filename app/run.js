@@ -8,10 +8,10 @@
 			'markdown': 'app/hc/markdown'
 		},
 		packages: {
-			curl: { location: 'components/curl/src/curl' },
-			when: { location: 'components/when', main: 'when' },
-			marked: { location: 'components/marked', main: 'lib/marked' },
-			highlightjs: { location: 'components/highlightjs', main: 'highlight.pack.js' }
+			curl: { location: 'bower_components/curl/src/curl' },
+			when: { location: 'bower_components/when', main: 'when' },
+			marked: { location: 'bower_components/marked', main: 'lib/marked' },
+			highlightjs: { location: 'bower_components/highlightjs', main: 'highlight.pack.js' }
 		}
 	});
 

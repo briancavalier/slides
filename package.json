@@ -1,0 +1,30 @@
+{
+  "name": "slides",
+  "version": "2.1.0",
+  "description": "HTML5 slides framework",
+  "main": "index.html",
+  "scripts": {
+    "prepublish": "bower install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/briancavalier/slides.git"
+  },
+  "keywords": [
+    "slides",
+    "presentation",
+    "deck",
+    "html",
+    "promises"
+  ],
+  "devDependencies": {
+    "bower": "~0.10"
+  },
+  "author": "brian@hovercraftstudios.com",
+  "license": "MIT",
+  "readmeFilename": "README.md",
+  "gitHead": "1fb3d7c2caf69177990cfffb46a0e119cd4dc114",
+  "bugs": {
+    "url": "https://github.com/briancavalier/slides/issues"
+  }
+}

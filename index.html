@@ -2,12 +2,12 @@
 <!--
 	Copyright (c) 2011-2013 Brian Cavalier
 	This is a basic HTML template for creating slide presentations using
-	the slide framework.  
+	the slide framework.
  -->
 
 <!-- Parts from HTML5 Boilerplate: http://html5boilerplate.com -->
 
-<!-- paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/ --> 
+<!-- paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/ -->
 <!--[if lt IE 7 ]> <html lang="en" class="ie6"> <![endif]-->
 <!--[if IE 7 ]>    <html lang="en" class="ie7"> <![endif]-->
 <!--[if IE 8 ]>    <html lang="en" class="ie8"> <![endif]-->
@@ -23,16 +23,15 @@
 
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, maximum-scale=1.0">
 	<meta name="apple-mobile-web-app-capable" content="yes"/>
-	
+
 	<!-- Ensure no FUOC in the slides -->
 	<style type="text/css">
 		.presentation-loading * {
 			visibility: hidden;
 		}
 	</style>
-	
-	<script src="components/curl/src/curl.js"></script>
-	<script src="app/run.js"></script>
+
+	<script data-curl-run="app/run.js" src="bower_components/curl/src/curl.js"></script>
 </head>
 
 <!-- Avoid any FUOC by adding presentation-loading, which the framework
@@ -52,6 +51,6 @@
 			<p>Copyright &copy; 2011-2013 Brian Cavalier</p>
 		</footer>
 	</div>
-	
+
 </body>
 </html>
