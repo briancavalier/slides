@@ -1,6 +1,6 @@
 Open Source Initiative OSI - The MIT License
 
-http://www.opensource.org/licenses/mit-license.php
+http://www.opensource.org/licenses/mit-license.php test
 
 Copyright (c) 2011 Brian Cavalier
 
