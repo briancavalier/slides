@@ -1,0 +1,10 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: slides
+  annotations:
+    github.com/project-slug: booma/slides
+spec:
+  type: other
+  lifecycle: unknown
+  owner: team-c
